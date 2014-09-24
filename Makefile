@@ -3,8 +3,7 @@
 # Dependency: cnvkit.py must be in $PATH
 
 cnvkit=cnvkit.py
-refgenome_ucsc=/home/etal/db/ucsc.hg19.fasta
-refgenome_nochr=/home/etal/db/hg19-nochr.fa
+refgenome_ucsc=~/db/ucsc.hg19.fasta
 
 # ------------------------------------------------------------------------------
 # Targeted resequencing samples ("TR")
@@ -71,7 +70,7 @@ reference-tr-wide.cnn: $(tr_wide_ref_cnns)
 	$(cnvkit) reference $^ -f $(refgenome_ucsc) -y -o $@
 
 reference-exome.cnn: $(ex_ref_cnns)
-	$(cnvkit) reference $^ -f $(refgenome_nochr) -y -o $@
+	$(cnvkit) reference $^ -f $(refgenome_ucsc) -y -o $@
 
 
 # == Build components
@@ -91,8 +90,8 @@ $(tr_wide_cnrs_flat): build/%_flat.cnr: tr-wide/%.targetcoverage.cnn tr-wide/%.a
 $(ex_cnrs): build/%.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn reference-exome.cnn
 	$(cnvkit) fix $^ -o $@
 
-# $(ex_cnrs_flat): build/%_flat.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn intervals/reference-ex-flat-thin.cnn
-#         $(cnvkit) fix $^ -o $@
+$(ex_cnrs_flat): build/%_flat.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn intervals/reference-ex-flat-wide.cnn
+	$(cnvkit) fix $^ -o $@
 
 $(tr_thin_segs) $(tr_wide_segs) $(ex_segs) $(tr_thin_segs_flat) $(tr_wide_segs_flat) $(ex_segs_flat): %.cns: %.cnr
 	$(cnvkit) segment $< -o $@
