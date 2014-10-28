@@ -6,6 +6,16 @@ cnvkit=cnvkit.py
 refgenome_ucsc=~/db/ucsc.hg19.fasta
 
 # ------------------------------------------------------------------------------
+# Cell line validation ("CL")
+
+cl_ref_cnns= $(wildcard cell/Fresh_BIVL17_N.*.cnn) $(wildcard cell/Fresh_MB1036_N.*.cnn)
+cl_tcnn=cell/CL_seq.targetcoverage.cnn
+cl_cnrs=build/CL_seq.cnr build/CL_acgh.cnr
+cl_cnrs_flat=build/CL_seq_flat.cnr
+cl_segs=$(cl_cnrs:.cnr=.cns) $(cl_cnrs_flat:.cnr=.cns)
+
+
+# ------------------------------------------------------------------------------
 # Targeted resequencing samples ("TR")
 
 tr_ref_cnns=$(wildcard targeted/TR_*_N.*.cnn)
@@ -40,14 +50,14 @@ ex_segs_flat=$(ex_cnrs_flat:.cnr=.cns)
 # ------------------------------------------------------------------------------
 #  Action!
 
-all: tr ex
+all: cl tr ex
 
+
+.PHONY: cl
+cl: heatmap-cl.pdf cl-metrics.csv
 
 .PHONY: tr
-tr: heatmap-tr.pdf tr-metrics.csv heatmap-tr-flat.pdf tr-metrics-flat.csv \
-	heatmap-tr-thin.pdf tr-thin-metrics.csv \
-	heatmap-tr-thin-flat.pdf tr-thin-metrics-flat.csv
-
+tr: heatmap-tr.pdf tr-metrics.csv heatmap-tr-flat.pdf tr-metrics-flat.csv
 
 .PHONY: ex
 ex: $(ex_segs) ex-metrics.csv heatmap-exome.pdf ex-metrics-flat.csv heatmap-exome-flat.pdf
@@ -59,12 +69,17 @@ clean:
 	rm -vf build/TR* heatmap-tr*.pdf
 	# Exome
 	rm -vf build/EX* heatmap-exome.pdf
+	# Cell
+	rm -vf build/CL* heatmap-cl.pdf
 
 
 # ------------------------------------------------------------------------------
 # Standard workflow
 
 # == Build pooled references from normal samples
+
+reference-cell.cnn: $(cl_ref_cnns)
+	$(cnvkit) reference $^ -f $(refgenome_ucsc) -y -o $@
 
 reference-tr-thin.cnn: $(tr_thin_ref_cnns)
 	$(cnvkit) reference $^ -f $(refgenome_ucsc) -y -o $@
@@ -77,6 +92,15 @@ reference-exome.cnn: $(ex_ref_cnns)
 
 
 # == Build components
+
+build/CL_seq.cnr: build/%.cnr: cell/%.targetcoverage.cnn cell/%.antitargetcoverage.cnn reference-cell.cnn
+	$(cnvkit) fix $^ -o $@
+
+build/CL_acgh.cnr: cell/CL_acgh.cnr
+	cp $< $@
+
+$(cl_cnrs_flat): build/%_flat.cnr: cell/%.targetcoverage.cnn cell/%.antitargetcoverage.cnn intervals/reference-cl-flat.cnn
+	$(cnvkit) fix $^ -o $@
 
 $(tr_thin_cnrs): build/%.cnr: tr-thin/%.targetcoverage.cnn tr-thin/%.antitargetcoverage.cnn reference-tr-thin.cnn
 	$(cnvkit) fix $^ -o $@
@@ -96,11 +120,14 @@ $(ex_cnrs): build/%.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.c
 $(ex_cnrs_flat): build/%_flat.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn intervals/reference-ex-flat-wide.cnn
 	$(cnvkit) fix $^ -o $@
 
-$(tr_thin_segs) $(tr_segs) $(ex_segs) $(tr_thin_segs_flat) $(tr_segs_flat) $(ex_segs_flat): %.cns: %.cnr
+$(cl_segs) $(tr_thin_segs) $(tr_segs) $(ex_segs) $(tr_thin_segs_flat) $(tr_segs_flat) $(ex_segs_flat): %.cns: %.cnr
 	$(cnvkit) segment $< -o $@
 
 
 # == Results
+
+heatmap-cl.pdf: $(cl_segs)
+	$(cnvkit) heatmap -d -o $@ $^
 
 heatmap-tr-thin.pdf: $(tr_thin_segs)
 	$(cnvkit) heatmap -d -o $@ $(filter %_T_thin.cns,$^)
@@ -111,6 +138,9 @@ heatmap-tr.pdf: $(tr_segs)
 heatmap-exome.pdf: $(ex_segs)
 	$(cnvkit) heatmap -d -o $@ $(filter %_T.cns,$^)
 
+
+cl-metrics.csv: $(cl_segs)
+	$(cnvkit) metrics $(cl_segs:.cns=.cnr) -s $^ -o $@
 
 tr-thin-metrics.csv: $(tr_thin_segs)
 	$(cnvkit) metrics $(tr_thin_cnrs) -s $^ -o $@
