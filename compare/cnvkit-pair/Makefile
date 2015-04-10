@@ -19,10 +19,13 @@ ex_references=$(patsubst %_T.cnr,reference-%.cnn,$(ex_cnrs))
 all: tr ex
 
 .PHONY: tr
-tr: heatmap-tr-paired.pdf metrics-tr-paired.csv
+tr: heatmap-tr-paired.pdf
 
 .PHONY: ex
-ex: $(ex_segs) metrics-ex-paired.csv heatmap-ex-paired.pdf
+ex: $(ex_segs) heatmap-ex-paired.pdf
+
+.PHONY: metrics
+ex:  metrics-tr-paired.csv metrics-ex-paired.csv
 
 .PHONY: clean
 clean:
