@@ -7,14 +7,14 @@ refgenome_ucsc=~/db/ucsc.hg19.fasta
 # ex_anti_bed=../../intervals/ex.antitarget-6-90kb.bed
 
 tr_tcnn=$(wildcard ../../targeted/TR*.targetcoverage.cnn)
-tr_cnrs=$(patsubst ../../targeted/%.targetcoverage.cnn,%.cnr,$(filter %_T.targetcoverage.cnn,$(tr_tcnn)))
+tr_cnrs=$(patsubst ../../targeted/%.targetcoverage.cnn,%_pair.cnr,$(filter %_T.targetcoverage.cnn,$(tr_tcnn)))
 tr_segs=$(tr_cnrs:.cnr=.cns)
-tr_references=$(patsubst %_T.cnr,reference-%.cnn,$(tr_cnrs))
+tr_references=$(patsubst %_T_pair.cnr,reference-%.cnn,$(tr_cnrs))
 
 ex_tcnn=$(wildcard ../../exome/EX*.targetcoverage.cnn)
-ex_cnrs=$(patsubst ../../exome/%.targetcoverage.cnn,%.cnr,$(filter %_T.targetcoverage.cnn,$(ex_tcnn)))
+ex_cnrs=$(patsubst ../../exome/%.targetcoverage.cnn,%_pair.cnr,$(filter %_T.targetcoverage.cnn,$(ex_tcnn)))
 ex_segs=$(ex_cnrs:.cnr=.cns)
-ex_references=$(patsubst %_T.cnr,reference-%.cnn,$(ex_cnrs))
+ex_references=$(patsubst %_T_pair.cnr,reference-%.cnn,$(ex_cnrs))
 
 all: tr ex
 
@@ -25,7 +25,7 @@ tr: heatmap-tr-paired.pdf
 ex: $(ex_segs) heatmap-ex-paired.pdf
 
 .PHONY: metrics
-ex:  metrics-tr-paired.csv metrics-ex-paired.csv
+metrics:  metrics-tr-paired.csv metrics-ex-paired.csv
 
 .PHONY: clean
 clean:
@@ -42,10 +42,10 @@ $(ex_references): reference-%.cnn: ../../exome/%_N.targetcoverage.cnn ../../exom
 	cnvkit.py reference $^ -f $(refgenome_ucsc) -y -o $@
 
 
-$(tr_cnrs): %_T.cnr: ../../targeted/%_T.targetcoverage.cnn ../../targeted/%_T.antitargetcoverage.cnn reference-%.cnn
+$(tr_cnrs): %_T_pair.cnr: ../../targeted/%_T.targetcoverage.cnn ../../targeted/%_T.antitargetcoverage.cnn reference-%.cnn
 	cnvkit.py fix $^ -o $@
 
-$(ex_cnrs): %_T.cnr: ../../exome/%_T.targetcoverage.cnn ../../exome/%_T.antitargetcoverage.cnn reference-%.cnn
+$(ex_cnrs): %_T_pair.cnr: ../../exome/%_T.targetcoverage.cnn ../../exome/%_T.antitargetcoverage.cnn reference-%.cnn
 	cnvkit.py fix $^ -o $@
 
 
@@ -61,8 +61,8 @@ metrics-ex-paired.csv: $(ex_segs)
 
 
 heatmap-tr-paired.pdf: $(tr_segs)
-	cnvkit.py heatmap -d -o $@ $(filter %_T.cns,$^)
+	cnvkit.py heatmap -d -o $@ $^
 
 heatmap-ex-paired.pdf: $(ex_segs)
-	cnvkit.py heatmap -d -o $@ $(filter %_T.cns,$^)
+	cnvkit.py heatmap -d -o $@ $^
 

@@ -7,21 +7,24 @@ ex_tgt_bed=../../intervals/ex.target-267.bed
 ex_anti_bed=../../intervals/ex.antitarget-6-90kb.bed
 
 tr_tcnn=$(wildcard ../../targeted/TR*.targetcoverage.cnn)
-tr_cnrs_flat=$(patsubst ../../targeted/%.targetcoverage.cnn,%_flat.cnr,$(tr_tcnn))
+tr_cnrs_flat=$(patsubst ../../targeted/%.targetcoverage.cnn,%_flat.cnr,$(filter %_T.targetcoverage.cnn,$(tr_tcnn)))
 tr_segs_flat=$(tr_cnrs_flat:.cnr=.cns)
 
 ex_tcnn=$(wildcard ../../exome/EX*.targetcoverage.cnn)
-ex_cnrs_flat=$(patsubst ../../exome/%.targetcoverage.cnn,%_flat.cnr,$(ex_tcnn))
+ex_cnrs_flat=$(patsubst ../../exome/%.targetcoverage.cnn,%_flat.cnr,$(filter %_T.targetcoverage.cnn,$(ex_tcnn)))
 ex_segs_flat=$(ex_cnrs_flat:.cnr=.cns)
 
 
 all: tr ex
 
 .PHONY: tr
-tr: heatmap-tr-flat.pdf metrics-tr-flat.csv
+tr: heatmap-tr-flat.pdf
 
 .PHONY: ex
-ex: $(ex_segs) metrics-ex-flat.csv heatmap-ex-flat.pdf
+ex: $(ex_segs) heatmap-ex-flat.pdf
+
+.PHONY: metrics
+metrics: metrics-tr-flat.csv metrics-ex-flat.csv
 
 .PHONY: clean
 clean:
@@ -56,8 +59,8 @@ metrics-ex-flat.csv: $(ex_segs_flat)
 
 
 heatmap-tr-flat.pdf: $(tr_segs_flat)
-	cnvkit.py heatmap -d -o $@ $(filter %_T_flat.cns,$^)
+	cnvkit.py heatmap -d -o $@ $^
 
 heatmap-ex-flat.pdf: $(ex_segs_flat)
-	cnvkit.py heatmap -d -o $@ $(filter %_T_flat.cns,$^)
+	cnvkit.py heatmap -d -o $@ $^
 
