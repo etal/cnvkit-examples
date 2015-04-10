@@ -1,0 +1,43 @@
+# Stuff I don't want to see
+build/
+compare/acgh/*.cnr
+compare/acgh/*.cns
+compare/cnvkit-flat/*.cnr
+compare/cnvkit-flat/*.cns
+compare/cnvkit-pair/*.cnr
+compare/cnvkit-pair/*.cns
+
+# Compiled python files
+*.pyc
+*.pyo
+
+# Jython class files
+*.class
+
+# Backup files from some Unix editors
+*~
+*.swp
+*.bak
+
+# Patches and any original files created by patch command
+*.diff
+*.patch
+*.orig
+*.rej
+
+# Mac OS X hidden files
+.DS_Store
+
+# Dolphin window manager hidden files
+.directory
+
+# MANIFEST file created automatically from MANIFEST.in (pip packaging)
+MANIFEST
+
+# Java TreeView backup/cache/index/whatever generated file
+*.jtv
+
+# R session files
+.RData
+.Rhistory
+
