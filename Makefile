@@ -22,17 +22,14 @@ tr_ref_cnns=$(wildcard targeted/TR_*_N.*.cnn)
 tr_tcnn=$(wildcard targeted/TR*.targetcoverage.cnn)
 tr_cnrs=$(patsubst targeted/%.targetcoverage.cnn,build/%.cnr,$(tr_tcnn))
 tr_segs=$(tr_cnrs:.cnr=.cns)
-# Flat reference
-tr_cnrs_flat=$(patsubst targeted/%.targetcoverage.cnn,build/%_flat.cnr,$(tr_tcnn))
-tr_segs_flat=$(tr_cnrs_flat:.cnr=.cns)
 
 tr_thin_ref_cnns=$(wildcard tr-thin/TR_*_N_thin.*.cnn)
 tr_thin_tcnn=$(wildcard tr-thin/TR*_thin.targetcoverage.cnn)
 tr_thin_cnrs=$(patsubst tr-thin/%.targetcoverage.cnn,build/%.cnr,$(tr_thin_tcnn))
 tr_thin_segs=$(tr_thin_cnrs:.cnr=.cns)
 # Flat reference
-tr_thin_cnrs_flat=$(patsubst tr-thin/%.targetcoverage.cnn,build/%_flat.cnr,$(tr_thin_tcnn))
-tr_thin_segs_flat=$(tr_thin_cnrs_flat:.cnr=.cns)
+# tr_thin_cnrs_flat=$(patsubst tr-thin/%.targetcoverage.cnn,build/%_flat.cnr,$(tr_thin_tcnn))
+# tr_thin_segs_flat=$(tr_thin_cnrs_flat:.cnr=.cns)
 
 
 # ------------------------------------------------------------------------------
@@ -42,9 +39,6 @@ ex_ref_cnns=$(wildcard exome/EX_*_N.*.cnn)
 ex_tcnn=$(wildcard exome/EX*.targetcoverage.cnn)
 ex_cnrs=$(patsubst exome/%.targetcoverage.cnn,build/%.cnr,$(ex_tcnn))
 ex_segs=$(ex_cnrs:.cnr=.cns)
-# Flat reference
-ex_cnrs_flat=$(patsubst exome/%.targetcoverage.cnn,build/%_flat.cnr,$(ex_tcnn))
-ex_segs_flat=$(ex_cnrs_flat:.cnr=.cns)
 
 
 # ------------------------------------------------------------------------------
@@ -57,10 +51,10 @@ all: cl tr ex
 cl: heatmap-cl.pdf cl-metrics.csv
 
 .PHONY: tr
-tr: heatmap-tr.pdf tr-metrics.csv heatmap-tr-flat.pdf tr-metrics-flat.csv
+tr: heatmap-tr.pdf tr-metrics.csv
 
 .PHONY: ex
-ex: $(ex_segs) ex-metrics.csv heatmap-exome.pdf ex-metrics-flat.csv heatmap-exome-flat.pdf
+ex: $(ex_segs) ex-metrics.csv heatmap-exome.pdf
 
 
 .PHONY: clean
@@ -108,19 +102,13 @@ $(tr_thin_cnrs): build/%.cnr: tr-thin/%.targetcoverage.cnn tr-thin/%.antitargetc
 $(tr_cnrs): build/%.cnr: targeted/%.targetcoverage.cnn targeted/%.antitargetcoverage.cnn reference-tr.cnn
 	$(cnvkit) fix $^ -o $@
 
-$(tr_thin_cnrs_flat): build/%_flat.cnr: tr-thin/%.targetcoverage.cnn tr-thin/%.antitargetcoverage.cnn intervals/reference-tr-flat-thin.cnn
-	$(cnvkit) fix $^ -o $@
-
-$(tr_cnrs_flat): build/%_flat.cnr: targeted/%.targetcoverage.cnn targeted/%.antitargetcoverage.cnn intervals/reference-tr-flat-wide.cnn
-	$(cnvkit) fix $^ -o $@
+# $(tr_thin_cnrs_flat): build/%_flat.cnr: tr-thin/%.targetcoverage.cnn tr-thin/%.antitargetcoverage.cnn intervals/reference-tr-flat-thin.cnn
+#         $(cnvkit) fix $^ -o $@
 
 $(ex_cnrs): build/%.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn reference-exome.cnn
 	$(cnvkit) fix $^ -o $@
 
-$(ex_cnrs_flat): build/%_flat.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn intervals/reference-ex-flat-wide.cnn
-	$(cnvkit) fix $^ -o $@
-
-$(cl_segs) $(tr_thin_segs) $(tr_segs) $(ex_segs) $(tr_thin_segs_flat) $(tr_segs_flat) $(ex_segs_flat): %.cns: %.cnr
+$(cl_segs) $(tr_thin_segs) $(tr_segs) $(ex_segs): %.cns: %.cnr
 	$(cnvkit) segment $< -o $@
 
 
@@ -152,21 +140,9 @@ ex-metrics.csv: $(ex_segs)
 	$(cnvkit) metrics $(ex_cnrs) -s $^ -o $@
 
 
-heatmap-tr-thin-flat.pdf: $(tr_thin_segs_flat)
-	$(cnvkit) heatmap -d -o $@ $(filter %_T_thin_flat.cns,$^)
+# heatmap-tr-thin-flat.pdf: $(tr_thin_segs_flat)
+#         $(cnvkit) heatmap -d -o $@ $(filter %_T_thin_flat.cns,$^)
 
-heatmap-tr-flat.pdf: $(tr_segs_flat)
-	$(cnvkit) heatmap -d -o $@ $(filter %_T_flat.cns,$^)
+# tr-thin-metrics-flat.csv: $(tr_thin_segs_flat)
+#         $(cnvkit) metrics $(tr_thin_cnrs_flat) -s $^ -o $@
 
-heatmap-exome-flat.pdf: $(ex_segs_flat)
-	$(cnvkit) heatmap -d -o $@ $(filter %_T_flat.cns,$^)
-
-
-tr-thin-metrics-flat.csv: $(tr_thin_segs_flat)
-	$(cnvkit) metrics $(tr_thin_cnrs_flat) -s $^ -o $@
-
-tr-metrics-flat.csv: $(tr_segs_flat)
-	$(cnvkit) metrics $(tr_cnrs_flat) -s $^ -o $@
-
-ex-metrics-flat.csv: $(ex_segs_flat)
-	$(cnvkit) metrics $(ex_cnrs) -s $^ -o $@
