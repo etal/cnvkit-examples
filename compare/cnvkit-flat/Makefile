@@ -52,7 +52,7 @@ metrics-tr-flat.csv: $(tr_segs_flat)
 	cnvkit.py metrics $(tr_cnrs_flat) -s $^ -o $@
 
 metrics-ex-flat.csv: $(ex_segs_flat)
-	cnvkit.py metrics $(ex_cnrs) -s $^ -o $@
+	cnvkit.py metrics $(ex_cnrs_flat) -s $^ -o $@
 
 
 heatmap-tr-flat.pdf: $(tr_segs_flat)
