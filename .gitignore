@@ -6,6 +6,10 @@ compare/cnvkit-flat/*.cnr
 compare/cnvkit-flat/*.cns
 compare/cnvkit-pair/*.cnr
 compare/cnvkit-pair/*.cns
+compare/contra-pair/*.cnr
+compare/contra-pair/*.cns
+compare/contra-pool/*.cnr
+compare/contra-pool/*.cns
 
 # Compiled python files
 *.pyc
