@@ -48,13 +48,16 @@ all: cl tr ex
 
 
 .PHONY: cl
-cl: heatmap-cl.pdf cl-metrics.csv
+cl: heatmap-cl.pdf
 
 .PHONY: tr
-tr: heatmap-tr.pdf tr-metrics.csv
+tr: heatmap-tr.pdf
 
 .PHONY: ex
-ex: $(ex_segs) ex-metrics.csv heatmap-exome.pdf
+ex: $(ex_segs) heatmap-exome.pdf
+
+.PHONY: metrics
+metrics: ex-metrics.csv tr-metrics.csv cl-metrics.csv
 
 
 .PHONY: clean
