@@ -2,8 +2,10 @@
 build/
 compare/acgh/*.cnr
 compare/acgh/*.cns
-compare/cnvkit-flat/*.cn?
-compare/cnvkit-pair/*.cn?
+compare/cnvkit-flat/*.cnr
+compare/cnvkit-flat/*.cns
+compare/cnvkit-pair/*.cnr
+compare/cnvkit-pair/*.cns
 
 # Compiled python files
 *.pyc
