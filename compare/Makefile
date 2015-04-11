@@ -13,10 +13,11 @@ ex_num=11 12 19 35 37 40 46 49 53 71
 all: tr ex
 
 .PHONY: tr
-tr: tr-cnvkit-pool.stats.csv tr-cnvkit-pair.stats.csv tr-cnvkit-flat.stats.csv
+tr: tr-cnvkit-pool.stats.csv tr-cnvkit-pair.stats.csv tr-cnvkit-flat.stats.csv tr-contra-pool.stats.csv tr-contra-pair.stats.csv
 
 .PHONY: ex
-ex: ex-cnvkit-pool.stats.csv ex-cnvkit-pair.stats.csv ex-cnvkit-flat.stats.csv
+ex: ex-cnvkit-pool.stats.csv ex-cnvkit-pair.stats.csv ex-cnvkit-flat.stats.csv ex-contra-pool.stats.csv ex-contra-pair.stats.csv
+
 
 .PHONY: clean
 clean:
@@ -51,7 +52,7 @@ $(tr_ckpool): tables/%.cnvkit-pool.csv: pair_segments.py acgh/%.cns $(cnvbuild)/
 $(ex_ckpool): tables/%.cnvkit-pool.csv: pair_segments.py acgh/%.cns $(cnvbuild)/%.cns
 	python $^ -i $(int_ex) -o $@
 
-# CNVkit, paired normal reference
+# CNVkit, paired normal references
 
 tr_ckpair=$(patsubst %,tables/TR_%_T.cnvkit-pair.csv,$(tr_num))
 ex_ckpair=$(patsubst %,tables/EX_%_T.cnvkit-pair.csv,$(ex_num))
@@ -84,5 +85,41 @@ $(tr_ckflat): tables/%.cnvkit-flat.csv: pair_segments.py acgh/%.cns cnvkit-flat/
 	python $^ -i $(int_tr) -o $@
 
 $(ex_ckflat): tables/%.cnvkit-flat.csv: pair_segments.py acgh/%.cns cnvkit-flat/%_flat.cns
+	python $^ -i $(int_ex) -o $@
+
+
+# CONTRA, pooled normal references
+
+tr_conpool=$(patsubst %,tables/TR_%_T.contra-pool.csv,$(tr_num))
+ex_conpool=$(patsubst %,tables/EX_%_T.contra-pool.csv,$(ex_num))
+
+tr-contra-pool.stats.csv: alt.py $(tr_conpool)
+	python $^ -n TR-CONTRA-pool > $@
+
+ex-contra-pool.stats.csv: alt.py $(ex_conpool)
+	python $^ -n EX-CONTRA-pool > $@
+
+$(tr_conpool): tables/%.contra-pool.csv: pair_segments.py acgh/%.cns contra-pool/%.contra-pool.cns
+	python $^ -i $(int_tr) -o $@
+
+$(ex_conpool): tables/%.contra-pool.csv: pair_segments.py acgh/%.cns contra-pool/%.contra-pool.cns
+	python $^ -i $(int_ex) -o $@
+
+
+# CONTRA, paired normal references
+
+tr_conpair=$(patsubst %,tables/TR_%_T.contra-pair.csv,$(tr_num))
+ex_conpair=$(patsubst %,tables/EX_%_T.contra-pair.csv,$(ex_num))
+
+tr-contra-pair.stats.csv: alt.py $(tr_conpair)
+	python $^ -n TR-CONTRA-pair > $@
+
+ex-contra-pair.stats.csv: alt.py $(ex_conpair)
+	python $^ -n EX-CONTRA-pair > $@
+
+$(tr_conpair): tables/%.contra-pair.csv: pair_segments.py acgh/%.cns contra-pair/%.contra-pair.cns
+	python $^ -i $(int_tr) -o $@
+
+$(ex_conpair): tables/%.contra-pair.csv: pair_segments.py acgh/%.cns contra-pair/%.contra-pair.cns
 	python $^ -i $(int_ex) -o $@
 
