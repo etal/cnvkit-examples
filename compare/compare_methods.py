@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 
 sn.set_style("darkgrid")
 
+
 def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
     if fname and os.stat(fname).st_size > 0:
         arr = np.loadtxt(fname)
@@ -55,24 +56,18 @@ if __name__ == '__main__':
         as_dframe(args.copywriter_tr, 'CopywriteR', 'TR'),
         as_dframe(args.copywriter_ex, 'CopywriteR', 'EX'),
     ])
-    # Cohorts as 2 halves of each violin
-    # fig, ax = plt.subplots(subplot_kw=dict(ylim=(-1,1)))
-    # sn.violinplot('Method', 'Difference', hue='Cohort', data=df,
-    #                         cut=0,
-    #                         gridsize=400,
-    #                         inner='quartile',
-    #                         split=True,
-    #                         palette='Blues_r',
-    #                         ax=ax
-    #                        )
-    # ax.set_ylabel("Difference from aCGH")
+
+    sixcolors = (sn.color_palette("Blues")[1:4] +
+                 sn.color_palette("Reds")[2:4] +
+                 ["gold"])
 
     # Cohorts split, methods in subplots
     grid = sn.FacetGrid(df, row="Cohort", row_order=['TR', 'EX'],
                         aspect=2.0, size=3.5, ylim=(-.6, .6),
                         margin_titles=True)
     (grid.map(sn.violinplot, "Method", "Difference", inner='quartile',
-              cut=0, gridsize=500, linewidth=1, width=0.95, palette='Blues')
+              palette=sn.color_palette(sixcolors),
+              cut=0, gridsize=500, linewidth=1, width=0.95)
      .set_ylabels("Difference from aCGH")
     )
 
