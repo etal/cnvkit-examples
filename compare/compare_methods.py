@@ -17,7 +17,17 @@ sn.set_style("darkgrid")
 def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
     if fname and os.stat(fname).st_size > 0:
         arr = np.loadtxt(fname)
-        print("Loaded", fname)
+        print("Loaded", fname, file=sys.stderr)
+        # Stats
+        mean = arr.mean()
+        limit = 1.96 * arr.std()
+        low, mid, hi = np.percentile(arr, [2.5, 50.0, 97.5])
+        absmax = np.absolute(arr).max()
+        n = len(arr)
+        print(fname, *(["%.5f" % val
+                       for val in (mean, limit, low, mid, hi, absmax)]
+                      + [n]),
+              sep='\t')
     else:
         # Dummy data
         arr = np.random.standard_t(1, (300))/10
@@ -42,6 +52,11 @@ if __name__ == '__main__':
     AP.add_argument("copywriter_ex", help="CopywriteR (EX cohort)")
     AP.add_argument("-o", "--output", help="Output PDF filename.")
     args = AP.parse_args()
+
+    # Stats table on stdout
+    print("File", "Mean", "Limit", "Low95", "Median", "High95", "MaxAbs", "N",
+          sep='\t')
+
     df = pd.concat([
         as_dframe(args.cnvkit_pool_tr, 'CNVkit-pool', 'TR'),
         as_dframe(args.cnvkit_pool_ex, 'CNVkit-pool', 'EX'),
