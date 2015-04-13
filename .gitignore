@@ -10,6 +10,7 @@ compare/contra-pair/*.cnr
 compare/contra-pair/*.cns
 compare/contra-pool/*.cnr
 compare/contra-pool/*.cns
+compare/copywriter/*.cns
 
 # Compiled python files
 *.pyc
