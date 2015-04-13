@@ -15,7 +15,7 @@ sn.set_style("darkgrid")
 
 
 def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
-    if fname and os.stat(fname).st_size > 0:
+    if fname and os.stat(fname).st_size > 1:
         arr = np.loadtxt(fname)
         print("Loaded", fname, file=sys.stderr)
         # Stats
@@ -44,12 +44,14 @@ if __name__ == '__main__':
     AP.add_argument("cnvkit_pair_ex", help="CNVkit (EX cohort, paired)")
     AP.add_argument("cnvkit_flat_tr", help="CNVkit (TR cohort, flat ref.)")
     AP.add_argument("cnvkit_flat_ex", help="CNVkit (EX cohort, flat ref.)")
+    AP.add_argument("copywriter_pair_tr", help="CopywriteR (TR cohort, paired)")
+    AP.add_argument("copywriter_pair_ex", help="CopywriteR (EX cohort, paired)")
+    AP.add_argument("copywriter_noref_tr", help="CopywriteR (TR cohort, no ref.)")
+    AP.add_argument("copywriter_noref_ex", help="CopywriteR (EX cohort, no ref.)")
     AP.add_argument("contra_pool_tr", help="CONTRA (TR cohort, pooled)")
     AP.add_argument("contra_pool_ex", help="CONTRA (EX cohort, pooled)")
     AP.add_argument("contra_pair_tr", help="CONTRA (TR cohort, paired)")
     AP.add_argument("contra_pair_ex", help="CONTRA (EX cohort, paired)")
-    AP.add_argument("copywriter_tr", help="CopywriteR (TR cohort)")
-    AP.add_argument("copywriter_ex", help="CopywriteR (EX cohort)")
     AP.add_argument("-o", "--output", help="Output PDF filename.")
     args = AP.parse_args()
 
@@ -57,31 +59,35 @@ if __name__ == '__main__':
     print("File", "Mean", "Limit", "Low95", "Median", "High95", "MaxAbs", "N",
           sep='\t')
 
-    df = pd.concat([
-        as_dframe(args.cnvkit_pool_tr, 'CNVkit-pool', 'TR'),
-        as_dframe(args.cnvkit_pool_ex, 'CNVkit-pool', 'EX'),
-        as_dframe(args.cnvkit_pair_tr, 'CNVkit-pair', 'TR'),
-        as_dframe(args.cnvkit_pair_ex, 'CNVkit-pair', 'EX'),
-        as_dframe(args.cnvkit_flat_tr, 'CNVkit-flat', 'TR'),
-        as_dframe(args.cnvkit_flat_ex, 'CNVkit-flat', 'EX'),
-        as_dframe(args.contra_pool_tr, 'CONTRA-pool', 'TR'),
-        as_dframe(args.contra_pool_ex, 'CONTRA-pool', 'EX'),
-        as_dframe(args.contra_pair_tr, 'CONTRA-pair', 'TR'),
-        as_dframe(args.contra_pair_ex, 'CONTRA-pair', 'EX'),
-        as_dframe(args.copywriter_tr, 'CopywriteR', 'TR'),
-        as_dframe(args.copywriter_ex, 'CopywriteR', 'EX'),
-    ])
+    my_colors = sn.color_palette(
+        sn.color_palette("Blues")[1:4] +
+        ["khaki", "gold"] +
+        sn.color_palette("Reds")[2:4],
+        7)
 
-    sixcolors = (sn.color_palette("Blues")[1:4] +
-                 sn.color_palette("Reds")[2:4] +
-                 ["gold"])
+    df = pd.concat([
+        as_dframe(args.cnvkit_pool_tr, 'CNVkit\npooled', 'TR'),
+        as_dframe(args.cnvkit_pool_ex, 'CNVkit\npooled', 'EX'),
+        as_dframe(args.cnvkit_pair_tr, 'CNVkit\npaired', 'TR'),
+        as_dframe(args.cnvkit_pair_ex, 'CNVkit\npaired', 'EX'),
+        as_dframe(args.cnvkit_flat_tr, 'CNVkit\nno ref.', 'TR'),
+        as_dframe(args.cnvkit_flat_ex, 'CNVkit\nno ref.', 'EX'),
+        as_dframe(args.copywriter_pair_tr, 'CopywriteR\npaired', 'TR'),
+        as_dframe(args.copywriter_pair_ex, 'CopywriteR\npaired', 'EX'),
+        as_dframe(args.copywriter_noref_tr, 'CopywriteR\nno ref.', 'TR'),
+        as_dframe(args.copywriter_noref_ex, 'CopywriteR\nno ref.', 'EX'),
+        as_dframe(args.contra_pool_tr, 'CONTRA\npooled', 'TR'),
+        as_dframe(args.contra_pool_ex, 'CONTRA\npooled', 'EX'),
+        as_dframe(args.contra_pair_tr, 'CONTRA\npaired', 'TR'),
+        as_dframe(args.contra_pair_ex, 'CONTRA\npaired', 'EX'),
+    ])
 
     # Cohorts split, methods in subplots
     grid = sn.FacetGrid(df, row="Cohort", row_order=['TR', 'EX'],
                         aspect=2.0, size=3.5, ylim=(-.6, .6),
                         margin_titles=True)
     (grid.map(sn.violinplot, "Method", "Difference", inner='quartile',
-              palette=sn.color_palette(sixcolors),
+              palette=my_colors,
               cut=0, gridsize=500, linewidth=1, width=0.95)
      .set_ylabels("Difference from aCGH")
     )

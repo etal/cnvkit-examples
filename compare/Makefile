@@ -31,10 +31,10 @@ comparison.pdf: compare_methods.py \
 	tr-cnvkit-pool.diffs.dat ex-cnvkit-pool.diffs.dat \
 	tr-cnvkit-pair.diffs.dat ex-cnvkit-pair.diffs.dat \
 	tr-cnvkit-flat.diffs.dat ex-cnvkit-flat.diffs.dat \
-	tr-contra-pool.diffs.dat ex-contra-pool.diffs.dat \
-	tr-contra-pair.diffs.dat ex-contra-pair.diffs.dat \
 	tr-copywriter-pair.diffs.dat ex-copywriter-pair.diffs.dat \
-	tr-copywriter-noref.diffs.dat ex-copywriter-noref.diffs.dat
+	tr-copywriter-noref.diffs.dat ex-copywriter-noref.diffs.dat \
+	tr-contra-pool.diffs.dat ex-contra-pool.diffs.dat \
+	tr-contra-pair.diffs.dat ex-contra-pair.diffs.dat
 	python $^ -o $@ > comparison.stats.csv
 
 
