@@ -10,7 +10,7 @@ tr_num=$(tr_180k) $(tr_244k)
 ex_num=11 12 19 35 37 40 46 49 53 71
 
 
-all: tr ex
+all: tr ex comparison.pdf
 
 .PHONY: tr
 tr: tr-cnvkit-pool.diffs.dat tr-cnvkit-pair.diffs.dat tr-cnvkit-flat.diffs.dat \

@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     # Cohorts split, methods in subplots
     grid = sn.FacetGrid(df, row="Cohort", row_order=['TR', 'EX'],
-                        aspect=2.0, size=3.5, ylim=(-.6, .6),
+                        aspect=2.0, size=3.5, ylim=(-.5, .5),
                         margin_titles=True)
     (grid.map(sn.violinplot, "Method", "Difference", inner='quartile',
               palette=my_colors,
