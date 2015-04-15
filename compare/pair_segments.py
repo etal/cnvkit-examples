@@ -19,6 +19,7 @@ def is_skipped_chromosome(chrom):
             chrom.startswith(('chrUn_', 'Un_')) or
             chrom.endswith('_random'))
 
+
 def read_paired_genes(cbs1, cbs2, interval):
     """Get the segment CN values for each targeted region.
 
@@ -50,7 +51,6 @@ def read_paired_genes(cbs1, cbs2, interval):
             chrom = chrom[3:]
         sel1 = segments1.in_range(chrom, start, end, trim=True)
         sel2 = segments2.in_range(chrom, start, end, trim=True)
-        # if (sel1['probes'] < 3).all() or (sel2['probes'] < 3).all():
         if len(sel1) == 0 or len(sel2) == 0:
             print("Skipping", name, "-- not covered by a segment")
             continue
@@ -62,28 +62,15 @@ def read_paired_genes(cbs1, cbs2, interval):
 def segment_cn(segset):
     """Get or estimate the segment's copy number.
 
-    If the segment set only contains one probe (i.e. segment), just return that
-    value. Otherwise, return the weighted mean of the segment CNs.
+    If the segment set only contains one row (i.e. segment), just return that
+    value. Otherwise, return the weighted mean of the segment log2 values.
     """
     if len(segset) == 0:
         raise ValueError("WTF: %s" % segset)
     elif len(segset) == 1:
         return segset.coverage[0]
     else:
-        ### Weighted mean
-        coverages = segset.coverage
-        sizes = segset.end - segset.start
-        avg = sum(coverages * sizes) / sum(sizes)
-        assert min(coverages) <= avg <= max(coverages)
-        return avg
-        # OR #
-        ### Value of segment with the most probes
-        # max_idx = segset['probes'].argmax()
-        # if max_idx.shape:
-        #     # Tie: average of the 2+ winners
-        #     return segset.coverage[max_idx].mean()
-        # else:
-        #     return segset.coverage[max_idx]
+        return np.average(segset.coverage, weights=(segset.end - segset.start))
 
 
 def interval2genes(interval, #skip=('CGH', '-'),
@@ -136,17 +123,6 @@ def pairs_as_dframe(pairs):
         ("label", np.asarray(col_label)),
         ("value1", np.asarray(col_val1)),
         ("value2", np.asarray(col_val2))])
-
-
-# def residual_stats(table):
-#     # mids = .5 * (table['value1'] + table['value2'])
-#     # resids = table['value1'] - mids
-#     resids = .5*(table['value1'] - table['value2'])
-#     mean = resids.mean()
-#     two_sd = 2 * resids.std()
-#     print("Mean:", mean)
-#     print("2*SD:", two_sd)
-#     return resids, mean, two_sd
 
 
 def main(args):
