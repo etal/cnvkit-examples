@@ -13,7 +13,7 @@ Column names::
                     CBS.Mean              -0.0291
     log2          = LogRatios             -0.0290663133430224
                     Above.PValues.Cutoff  0
-                    Calls                 No
+    gene          = Calls                 No
 """
 
 import argparse
@@ -28,8 +28,12 @@ AP.add_argument('-o', '--output')
 args = AP.parse_args()
 
 d = pd.read_table(args.contra_cbs1)
-cnarr = CNA(fbase(args.output),
-            d['Chr'], d['OriStCoordinate'], d['OriEndCoordinate'],
-            d['Calls'], d['LogRatios'], probes=d['NumberOfTargets'])
+cnarr = CNA.from_columns(fbase(args.output),
+                         chromosome=d['Chr'],
+                         start=d['OriStCoordinate'],
+                         end=d['OriEndCoordinate'],
+                         gene=d['Calls'],
+                         coverage=d['LogRatios'],
+                         probes=d['NumberOfTargets'])
 cnarr.sort()
 cnarr.write(args.output)

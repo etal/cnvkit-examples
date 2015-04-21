@@ -40,8 +40,11 @@ args = AP.parse_args()
 
 
 d = pd.read_table(args.contra_table)
-cnarr = CNA(fbase(args.output),
-            d['Chr'], d['OriStCoordinate'], d['OriEndCoordinate'],
-            d['Gene.Sym'], d['Adjusted.Mean.of.LogRatio'])
+cnarr = CNA.from_columns(fbase(args.output),
+                         chromosome=d['Chr'],
+                         start=d['OriStCoordinate'],
+                         end=d['OriEndCoordinate'],
+                         gene=d['Gene.Sym'],
+                         coverage=d['Adjusted.Mean.of.LogRatio'])
 cnarr.sort()
 cnarr.write(args.output)
