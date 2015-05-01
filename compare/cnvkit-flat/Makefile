@@ -1,10 +1,8 @@
 # Flat reference
 
 refgenome_ucsc=~/db/ucsc.hg19.fasta
-tr_tgt_bed=../../intervals/tr.target-267.bed
-tr_anti_bed=../../intervals/tr.antitarget-10-150kb.bed
-ex_tgt_bed=../../intervals/ex.target-267.bed
-ex_anti_bed=../../intervals/ex.antitarget-6-90kb.bed
+ref_tr=../../intervals/reference-tr-flat.cnn
+ref_ex=../../intervals/reference-ex-flat.cnn
 
 tr_tcnn=$(wildcard ../../targeted/TR*.targetcoverage.cnn)
 tr_cnrs_flat=$(patsubst ../../targeted/%.targetcoverage.cnn,%_flat.cnr,$(filter %_T.targetcoverage.cnn,$(tr_tcnn)))
@@ -34,17 +32,10 @@ clean:
 	rm -vf EX* heatmap-ex-flat.pdf
 
 
-reference-tr-flat.cnn: $(tr_tgt_bed) $(tr_anti_bed)
-	cnvkit.py reference -t $(tr_tgt_bed) -a $(tr_anti_bed) -f $(refgenome_ucsc) -y -o $@
-
-reference-ex-flat.cnn: $(ex_tgt_bed) $(ex_anti_bed)
-	cnvkit.py reference -t $(ex_tgt_bed) -a $(ex_anti_bed) -f $(refgenome_ucsc) -y -o $@
-
-
-$(tr_cnrs_flat): %_flat.cnr: ../../targeted/%.targetcoverage.cnn ../../targeted/%.antitargetcoverage.cnn reference-tr-flat.cnn
+$(tr_cnrs_flat): %_flat.cnr: ../../targeted/%.targetcoverage.cnn ../../targeted/%.antitargetcoverage.cnn $(ref_tr)
 	cnvkit.py fix $^ -o $@
 
-$(ex_cnrs_flat): %_flat.cnr: ../../exome/%.targetcoverage.cnn ../../exome/%.antitargetcoverage.cnn reference-ex-flat.cnn
+$(ex_cnrs_flat): %_flat.cnr: ../../exome/%.targetcoverage.cnn ../../exome/%.antitargetcoverage.cnn $(ref_ex)
 	cnvkit.py fix $^ -o $@
 
 $(tr_segs_flat) $(ex_segs_flat): %.cns: %.cnr
