@@ -16,6 +16,9 @@ from matplotlib import pyplot
 
 seaborn.set_style("ticks")
 
+# Interquartile range of segmented log2 values in normal TR samples
+NEUTRAL_RANGE = None
+
 
 def plot_diffs_vs_means(name, diffs, means):
     grid = seaborn.jointplot(means, diffs, kind='scatter', stat_func=None,
@@ -53,6 +56,10 @@ if __name__ == '__main__':
     all_means = []
     for fname in args.fnames:
         table = pandas.read_csv(fname)
+        if NEUTRAL_RANGE:
+            # Drop copy-number-neutral genes according to aCGH
+            table = table[table['value1'].abs() > NEUTRAL_RANGE]
+        # Compute
         diffs = table['value2'] - table['value1']
         means = .5*(table['value1'] + table['value2'])
         # plot_diffs_vs_means(basename(fname).split('.', 1)[0], diffs, means)

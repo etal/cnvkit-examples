@@ -15,6 +15,7 @@ sn.set_style("darkgrid")
 
 
 def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
+    """Load an aCGH-vs-method file as a DataFrame. Print summary stats."""
     if fname and os.stat(fname).st_size > 1:
         arr = np.loadtxt(fname)
         print("Loaded", fname, file=sys.stderr)
@@ -24,7 +25,7 @@ def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
         low, mid, hi = np.percentile(arr, [2.5, 50.0, 97.5])
         absmax = np.absolute(arr).max()
         n = len(arr)
-        print(fname, *(["%.5f" % val
+        print(fname, *(["%.5g" % val
                        for val in (mean, limit, low, mid, hi, absmax)]
                       + [n]),
               sep='\t')
@@ -84,11 +85,11 @@ if __name__ == '__main__':
 
     # Cohorts split, methods in subplots
     grid = sn.FacetGrid(df, row="Cohort", row_order=['TR', 'EX'],
-                        aspect=2.0, size=3.5, ylim=(-.5, .5),
+                        aspect=2.5, size=3.5, ylim=(-.35, .35),
                         margin_titles=True)
     (grid.map(sn.violinplot, "Method", "Difference", inner='quartile',
               palette=my_colors,
-              cut=0, gridsize=500, linewidth=1, width=0.95)
+              cut=0, gridsize=1000, linewidth=1, width=0.95)
      .set_ylabels("Difference from aCGH")
     )
 
