@@ -31,8 +31,7 @@ def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
               sep='\t')
     else:
         # Dummy data
-        arr = np.random.standard_t(1, (300))/10
-        arr = arr[(ymin <= arr) & (arr <= ymax)]
+        arr = np.random.triangular(ymin, 0, ymax, 300)
     return pd.DataFrame({"Difference": arr, "Method": method, "Cohort": cohort})
 
 
