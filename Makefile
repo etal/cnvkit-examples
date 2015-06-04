@@ -8,7 +8,7 @@ refgenome_ucsc=~/db/ucsc.hg19.fasta
 # ------------------------------------------------------------------------------
 # Cell line validation ("CL")
 
-cl_ref_cnns= $(wildcard cell/ffpe/*_N.*.cnn) $(wildcard cell/fresh/*_N.*.cnn)
+cl_ref_cnns=$(wildcard cell/normal/*_N.*.cnn)
 cl_tcnn=cell/CL_seq.targetcoverage.cnn
 cl_cnrs=build/CL_seq.cnr build/CL_acgh.cnr
 cl_cnrs_flat=build/CL_seq_flat.cnr
@@ -44,7 +44,7 @@ ex_segs=$(ex_cnrs:.cnr=.cns)
 # ------------------------------------------------------------------------------
 #  Action!
 
-all: tr ex
+all: cl tr ex
 
 
 .PHONY: cl
