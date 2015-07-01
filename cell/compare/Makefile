@@ -19,7 +19,7 @@ clacghpair=$(cnvbuild)/CL_acgh.cnr $(cnvbuild)/CL_acgh.cns
 all: heatmap.pdf scatters.pdf
 
 clean:
-	rm -vf *.pdf
+	rm -vf *.pdf metrics.tsv
 
 heatmap.pdf: $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns $(cnvbuild)/CL_seq_flat.cns
 	cnvkit.py heatmap $^ -d -o $@
@@ -28,6 +28,10 @@ scatters.pdf: cell-correlation.pdf cell-correlation-flat.pdf cell-paired-genome.
 	CL_acgh-scatter.pdf CL_seq-scatter.pdf CL_seq_flat-scatter.pdf \
 	focal-NTRK1.pdf focal-ALK.pdf focal-ROS1.pdf focal-MET-BRAF.pdf focal-CDKN2A.pdf focal-RET.pdf
 	pdfunite $^ $@
+
+metrics.tsv: $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns $(cnvbuild)/CL_seq_flat.cns
+	cnvkit.py metrics $(^:.cns=.cnr) -s $^ -o $@
+
 
 # Whole-genome scatter plots
 
