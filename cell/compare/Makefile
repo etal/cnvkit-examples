@@ -82,3 +82,9 @@ cell-correlation-flat.pdf: plot_paired_segments.py cell-correlation-flat.csv
 cell-correlation-flat.csv: pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq_flat.cns
 	python $^ -i $(baits) -o $@
 
+cell-correlation-cut.pdf: plot_paired_segments.py cell-correlation-cut.csv
+	python $^ -o $@
+
+cell-correlation-cut.csv: cut_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq_flat.cns
+	python $^ -i $(baits) -o $@
+
