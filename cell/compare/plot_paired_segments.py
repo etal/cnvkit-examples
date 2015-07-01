@@ -38,8 +38,10 @@ def main(args):
     table = pandas.read_csv(args.table)
     xvals = table['value1']
     yvals = table['value2']
-    print(table[(xvals < -1) | (yvals < -1) | ((xvals - yvals).abs() > .5)],
-          file=sys.stderr)
+    print("Sizeable gains/losses:")
+    print(table[(xvals < -1) | (yvals < -1)], file=sys.stderr)
+    print("Sizeable discrepencies:")
+    print(table[(xvals - yvals).abs() > .5], file=sys.stderr)
 #     chromosome     start       end   label  value1    value2
 # 4         chr1  44401651  44402437    ARTN -0.1335 -1.919546
 # 102       chr6  32163209  32191718  NOTCH4 -0.0026 -2.128800
@@ -120,7 +122,7 @@ def main(args):
     # grid.ax_joint.set_ylabel("Lane 2 copy ratio (log2)")
 
     if args.output:
-        pyplot.savefig(args.output, format='pdf', bbox_inches=0)
+        pyplot.savefig(args.output, format='pdf', bbox_inches='tight')
         print("Wrote", args.output, file=sys.stderr)
     else:
         pyplot.show()

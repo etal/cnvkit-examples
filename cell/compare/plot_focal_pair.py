@@ -11,6 +11,7 @@ import numpy
 import cnvlib
 from cnvlib import commands, plots
 
+# TODO - dot sizes ~ weight
 
 def get_plot_args(cnarr, segarr, chrom, window_coords):
     sel_probes = cnarr.in_range(chrom, *window_coords)
@@ -112,7 +113,7 @@ def main(args):
 
     # Save it.
     if args.output:
-        pyplot.savefig(args.output, format='pdf', bbox_inches=0)
+        pyplot.savefig(args.output, format='pdf', bbox_inches='tight')
         print("Wrote", args.output, file=sys.stderr)
     else:
         pyplot.show()
