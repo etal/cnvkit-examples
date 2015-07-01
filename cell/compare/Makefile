@@ -69,12 +69,12 @@ focal-chr9.pdf: $(clseqpair) $(clacghpair)
 cell-correlation.pdf: plot_paired_segments.py cell-correlation.csv
 	python $^ -o $@
 
-cell-correlation.csv: ../../compare/pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns
+cell-correlation.csv: pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns
 	python $^ -i $(baits) -o $@
 
 cell-correlation-flat.pdf: plot_paired_segments.py cell-correlation-flat.csv
 	python $^ -o $@
 
-cell-correlation-flat.csv: ../../compare/pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq_flat.cns
+cell-correlation-flat.csv: pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq_flat.cns
 	python $^ -i $(baits) -o $@
 
