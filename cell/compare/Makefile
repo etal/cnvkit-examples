@@ -12,11 +12,12 @@
 
 baits=../../intervals/cell-baits.bed
 cnvbuild=../../build
+
 clseqpair=$(cnvbuild)/CL_seq.cnr $(cnvbuild)/CL_seq.cns
 clacghpair=$(cnvbuild)/CL_acgh.cnr $(cnvbuild)/CL_acgh.cns
 
 
-all: heatmap.pdf scatters.pdf
+all: heatmap.pdf scatters.pdf metrics.tsv
 
 clean:
 	rm -vf *.pdf metrics.tsv

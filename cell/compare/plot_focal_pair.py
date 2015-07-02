@@ -11,7 +11,6 @@ import numpy
 import cnvlib
 from cnvlib import commands, plots
 
-# TODO - dot sizes ~ weight
 
 def get_plot_args(cnarr, segarr, chrom, window_coords):
     sel_probes = cnarr.in_range(chrom, *window_coords)
@@ -49,7 +48,7 @@ def main(args):
     """."""
     # Load data
     cnarr = cnvlib.read(args.cnr_fname)
-    cnarr['weight'] = numpy.repeat(.78, len(cnarr))
+    # cnarr['weight'] = numpy.repeat(.78, len(cnarr))
     segarr = cnvlib.read(args.cns_fname)
     acgharr = cnvlib.read(args.cghr_fname)
     asegarr = cnvlib.read(args.cghs_fname)
