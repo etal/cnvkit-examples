@@ -68,9 +68,9 @@ def segment_cn(segset):
     if len(segset) == 0:
         raise ValueError("WTF: %s" % segset)
     elif len(segset) == 1:
-        return segset.coverage[0]
+        return segset['log2'][0]
     else:
-        return np.average(segset.coverage, weights=(segset.end - segset.start))
+        return np.average(segset['log2'], weights=(segset.end - segset.start))
 
 
 def interval2genes(interval, #skip=('CGH', '-'),
