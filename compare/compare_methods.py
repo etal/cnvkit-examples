@@ -23,10 +23,11 @@ def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
         mean = arr.mean()
         limit = 1.96 * arr.std()
         low, mid, hi = np.percentile(arr, [2.5, 50.0, 97.5])
+        spread = hi - low
         absmax = np.absolute(arr).max()
         n = len(arr)
         print(fname, *(["%.5g" % val
-                       for val in (mean, limit, low, mid, hi, absmax)]
+                       for val in (mean, spread, limit, low, mid, hi, absmax)]
                       + [n]),
               sep='\t')
     else:
@@ -56,8 +57,8 @@ if __name__ == '__main__':
     args = AP.parse_args()
 
     # Stats table on stdout
-    print("File", "Mean", "Limit", "Low95", "Median", "High95", "MaxAbs", "N",
-          sep='\t')
+    print("File", "Mean", "Spread", "Limit", "Low95", "Median", "High95",
+          "MaxAbs", "N", sep='\t')
 
     my_colors = sn.color_palette(
         sn.color_palette("Blues")[1:4] +
