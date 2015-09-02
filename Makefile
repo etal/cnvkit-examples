@@ -27,9 +27,6 @@ tr_thin_ref_cnns=$(wildcard tr-thin/TR_*_N_thin.*.cnn)
 tr_thin_tcnn=$(wildcard tr-thin/TR*_thin.targetcoverage.cnn)
 tr_thin_cnrs=$(patsubst tr-thin/%.targetcoverage.cnn,build/%.cnr,$(tr_thin_tcnn))
 tr_thin_segs=$(tr_thin_cnrs:.cnr=.cns)
-# Flat reference
-# tr_thin_cnrs_flat=$(patsubst tr-thin/%.targetcoverage.cnn,build/%_flat.cnr,$(tr_thin_tcnn))
-# tr_thin_segs_flat=$(tr_thin_cnrs_flat:.cnr=.cns)
 
 
 # ------------------------------------------------------------------------------
@@ -51,7 +48,7 @@ all: cl tr ex
 cl: heatmap-cl.pdf
 
 .PHONY: tr
-tr: heatmap-tr.pdf
+tr: heatmap-tr.pdf TR_95_T-diagram.pdf TR_95_T-scatter.pdf TR_95_T-CDK4-MDM2-scatter.pdf
 
 .PHONY: ex
 ex: $(ex_segs) heatmap-exome.pdf
@@ -105,9 +102,6 @@ $(tr_thin_cnrs): build/%.cnr: tr-thin/%.targetcoverage.cnn tr-thin/%.antitargetc
 $(tr_cnrs): build/%.cnr: targeted/%.targetcoverage.cnn targeted/%.antitargetcoverage.cnn reference-tr.cnn
 	$(cnvkit) fix $^ -o $@
 
-# $(tr_thin_cnrs_flat): build/%_flat.cnr: tr-thin/%.targetcoverage.cnn tr-thin/%.antitargetcoverage.cnn intervals/reference-tr-flat-thin.cnn
-#         $(cnvkit) fix $^ -o $@
-
 $(ex_cnrs): build/%.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn reference-exome.cnn
 	$(cnvkit) fix $^ -o $@
 
@@ -126,6 +120,9 @@ heatmap-tr-thin.pdf: $(tr_thin_segs)
 heatmap-tr.pdf: $(tr_segs)
 	$(cnvkit) heatmap -d -o $@ $(filter %_T.cns,$^)
 
+heatmap-tr-nod.pdf: $(tr_segs)
+	$(cnvkit) heatmap -o $@ $(filter %_T.cns,$^)
+
 heatmap-exome.pdf: $(ex_segs)
 	$(cnvkit) heatmap -d -o $@ $(filter %_T.cns,$^)
 
@@ -142,10 +139,14 @@ tr-metrics.csv: $(tr_segs)
 ex-metrics.csv: $(ex_segs)
 	$(cnvkit) metrics $(ex_cnrs) -s $^ -o $@
 
+# Example figures
+TR_95_T-diagram.pdf: build/TR_95_T.cns build/TR_95_T.cnr
+	$(cnvkit) diagram -s $^ -y -o $@
 
-# heatmap-tr-thin-flat.pdf: $(tr_thin_segs_flat)
-#         $(cnvkit) heatmap -d -o $@ $(filter %_T_thin_flat.cns,$^)
+TR_95_T-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
+	# $(cnvkit) scatter -s $^ -o $@
+	$(cnvkit) scatter -s $^ -v ~/Dropbox/projects/cnvkit/examples/tr95n-tr95t-call_stats.vcf -o $@
 
-# tr-thin-metrics-flat.csv: $(tr_thin_segs_flat)
-#         $(cnvkit) metrics $(tr_thin_cnrs_flat) -s $^ -o $@
+TR_95_T-CDK4-MDM2-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
+	$(cnvkit) scatter -s $^ -o $@ -c chr12:50000000-80000000 -g CDK4,MDM2
 
