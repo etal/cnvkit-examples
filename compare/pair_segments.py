@@ -65,12 +65,13 @@ def segment_cn(segset):
     If the segment set only contains one row (i.e. segment), just return that
     value. Otherwise, return the weighted mean of the segment log2 values.
     """
+    key = "coverage" if "coverage" in segset else "log2"
     if len(segset) == 0:
         raise ValueError("WTF: %s" % segset)
     elif len(segset) == 1:
-        return segset['log2'][0]
+        return segset[key][0]
     else:
-        return np.average(segset['log2'], weights=(segset.end - segset.start))
+        return np.average(segset[key], weights=(segset.end - segset.start))
 
 
 def interval2genes(interval, #skip=('CGH', '-'),
