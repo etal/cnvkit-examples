@@ -11,8 +11,6 @@ compare/contra-pair/*.cns
 compare/contra-pool/*.cnr
 compare/contra-pool/*.cns
 compare/copywriter/*.cns
-compare/*.diffs.dat
-compare/*.stats.dat
 compare/*.alt.pdf
 *.cnn.1
 
