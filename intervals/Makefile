@@ -1,11 +1,11 @@
 # Build the targets, antitargets and flat references for CL, TR and EX datasets
 
-cell_intervals=cell-baits.bed
-target_intervals=targeted-baits.interval_list
-exome_intervals=exome-baits.interval_list
-access_intervals=access-5k-mappable.hg19.bed
-genome_fasta=~/db/ucsc.hg19.fasta
-exclude_bed=wgEncodeDacMapabilityConsensusExcludable.hg19.bed wgEncodeDukeMapabilityRegionsExcludable.hg19.bed
+cell_intervals := cell-baits.bed
+target_intervals := targeted-baits.interval_list
+exome_intervals := exome-baits.interval_list
+access_intervals := access-5k-mappable.hg19.bed
+genome_fasta := ~/db/ucsc.hg19.fasta
+exclude_bed := wgEncodeDacMapabilityConsensusExcludable.hg19.bed wgEncodeDukeMapabilityRegionsExcludable.hg19.bed
 
 
 all: reference-cl-flat.cnn reference-tr-flat.cnn reference-ex-flat.cnn
@@ -18,7 +18,7 @@ clean:
 
 
 $(access_intervals): $(exclude_bed)
-	genome2access.py $(genome_fasta) -x $< -x $(lastword $^) -s 5000 -o $@
+	cnvkit.py access $(genome_fasta) -x $< -x $(lastword $^) -s 5000 -o $@
 
 
 # Cell

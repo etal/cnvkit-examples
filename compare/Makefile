@@ -1,16 +1,16 @@
 # Compare segmented CN values by aCGH, DNAseq at targeted genes in tumor samples
 
-int_tr=../intervals/targeted-baits.interval_list
-int_ex=../intervals/exome-baits.interval_list
+int_tr := ../intervals/targeted-baits.interval_list
+int_ex := ../intervals/exome-baits.interval_list
 
 # Not all TR samples have matching aCGH
-tr_180k=01 02 05 07 11 12 13 14 26 28 29 31 34 36 37 42 43 45 48 49 55 58 59 64 77 79
-tr_244k=93 94 95 96 98 99
-tr_num=$(tr_180k) $(tr_244k)
-ex_num=11 12 19 35 37 40 46 49 53 71
+tr_180k := 01 02 05 07 11 12 13 14 26 28 29 31 34 36 37 42 43 45 48 49 55 58 59 64 77 79
+tr_244k := 93 94 95 96 98 99
+tr_num := $(tr_180k) $(tr_244k)
+ex_num := 11 12 19 35 37 40 46 49 53 71
 
 # Griping
-tr_180k_failed_contra=06
+tr_180k_failed_contra := 06
 
 all: tr ex comparison.pdf
 
