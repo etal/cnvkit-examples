@@ -69,6 +69,7 @@ clean:
 # ------------------------------------------------------------------------------
 # Standard workflow
 
+
 # == Build pooled references from normal samples
 
 reference-cell.cnn: $(cl_ref_cnns)
@@ -85,6 +86,9 @@ reference-exome.cnn: $(ex_ref_cnns)
 
 
 # == Build components
+
+intervals/reference-cl-flat.cnn:
+	cd intervals && $(MAKE)
 
 build/CL_seq.cnr: build/%.cnr: cell/%.targetcoverage.cnn cell/%.antitargetcoverage.cnn reference-cell.cnn
 	cnvkit.py fix $^ -o $@
