@@ -1,6 +1,6 @@
 # Paired references
 
-refgenome_ucsc=~/db/ucsc.hg19.fasta
+# refgenome_ucsc=~/db/ucsc.hg19.fasta
 # tr_tgt_bed=../../intervals/tr.target-267.bed
 # tr_anti_bed=../../intervals/tr.antitarget-10-150kb.bed
 # ex_tgt_bed=../../intervals/ex.target-267.bed
@@ -9,11 +9,13 @@ refgenome_ucsc=~/db/ucsc.hg19.fasta
 tr_tcnn=$(wildcard ../../targeted/TR*.targetcoverage.cnn)
 tr_cnrs=$(patsubst ../../targeted/%.targetcoverage.cnn,%_pair.cnr,$(filter %_T.targetcoverage.cnn,$(tr_tcnn)))
 tr_segs=$(tr_cnrs:.cnr=.cns)
+tr_orig_ref=../../reference-tr.cnn
 tr_references=$(patsubst %_T_pair.cnr,reference-%.cnn,$(tr_cnrs))
 
 ex_tcnn=$(wildcard ../../exome/EX*.targetcoverage.cnn)
 ex_cnrs=$(patsubst ../../exome/%.targetcoverage.cnn,%_pair.cnr,$(filter %_T.targetcoverage.cnn,$(ex_tcnn)))
 ex_segs=$(ex_cnrs:.cnr=.cns)
+ex_orig_ref=../../reference-ex.cnn
 ex_references=$(patsubst %_T_pair.cnr,reference-%.cnn,$(ex_cnrs))
 
 all: tr ex
@@ -36,10 +38,14 @@ clean:
 
 
 $(tr_references): reference-%.cnn: ../../targeted/%_N.targetcoverage.cnn ../../targeted/%_N.antitargetcoverage.cnn
-	cnvkit.py reference $^ -f $(refgenome_ucsc) -y -o $@
+	cnvkit.py reference $^ -y -o $@.tmp.cnn
+	python ../add_gc_rmask.py $(tr_orig_ref) $@.tmp.cnn -o $@
+	rm $@.tmp.cnn
 
 $(ex_references): reference-%.cnn: ../../exome/%_N.targetcoverage.cnn ../../exome/%_N.antitargetcoverage.cnn
-	cnvkit.py reference $^ -f $(refgenome_ucsc) -y -o $@
+	cnvkit.py reference $^ -y -o $@.tmp.cnn
+	python ../add_gc_rmask.py $(ex_orig_ref) $@.tmp.cnn -o $@
+	rm $@.tmp.cnn
 
 
 $(tr_cnrs): %_T_pair.cnr: ../../targeted/%_T.targetcoverage.cnn ../../targeted/%_T.antitargetcoverage.cnn reference-%.cnn
