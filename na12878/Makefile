@@ -9,9 +9,13 @@ all: giab.cns
 
 exome_bed := ngv3.hg19.bed
 duke_exclude_bed := ../intervals/wgEncodeDukeMapabilityRegionsExcludable.hg19.bed
-lumpy_exclude_bed := lumpy-exclude.hg19.bed
+lumpy_exclude_bed := ../intervals/lumpy-exclude.hg19.bed
 hg19_fa := ~/db/ucsc.hg19.fasta
 refflat_db := ~/db/annot/refFlat.txt
+
+
+$(exome_bed): NGv3.bed
+	sed 's/.*/chr&/g' $< > $@
 
 ngv3-access.hg19.bed: 
 	cnvkit.py access $(hg19_fa) -x $(duke_exclude_bed) -x $(lumpy_exclude_bed) -o $@
@@ -27,16 +31,6 @@ ngv3.antitarget-2-30kb.bed: ngv3-access.hg19.bed $(exome_bed)
 
 ngv3.antitarget-6-90kb.bed: ngv3-access.hg19.bed $(exome_bed)
 	cnvkit.py antitarget -g $^ -a 90000 -m 6000 -o $@
-
-
-# NGv3.bed
-# ngv3.hg19.bed
-# ngv3-access.hg19.bed
-
-# ngv3.antitarget-2-30kb.bed
-# ngv3.antitarget-6-90kb.bed
-# ngv3.target-100.bed
-# ngv3.target-267.bed
 
 
 # Generic female references
