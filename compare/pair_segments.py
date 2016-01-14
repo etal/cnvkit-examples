@@ -49,8 +49,8 @@ def read_paired_genes(cbs1, cbs2, interval):
         if not has_chr:
             # Remove the 'chr' prefix from target gene chromosome name
             chrom = chrom[3:]
-        sel1 = segments1.in_range(chrom, start, end, trim=True)
-        sel2 = segments2.in_range(chrom, start, end, trim=True)
+        sel1 = segments1.in_range(chrom, start, end, mode="trim")
+        sel2 = segments2.in_range(chrom, start, end, mode="trim")
         if len(sel1) == 0 or len(sel2) == 0:
             print("Skipping", name, "-- not covered by a segment")
             continue
