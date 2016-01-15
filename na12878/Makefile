@@ -2,7 +2,10 @@
 # http://bcbio-nextgen.readthedocs.org/en/latest/contents/testing.html#exome-with-validation-against-reference-materials
 # Coverage obtained with several parameter set permutations for comparison
 
-all: giab.cns
+all: giab.p0.bed giab.p1.bed giab.del.bed
+
+clean:
+	rm *.cnr *.cns
 
 
 # Intervals
@@ -44,12 +47,27 @@ reference-giab.cnn: ngv3.target-267.bed ngv3.antitarget-6-90kb.bed
 
 # Pipeline, starting from coverages
 
-giab-thin.cnr giab.cnr: %.cnr: \
+giab.cnr giab-thin.cnr: %.cnr: \
 	%.targetcoverage.cnn %.antitargetcoverage.cnn reference-%.cnn
 	cnvkit.py fix $^ -o $@
 
-giab-thin.cns giab.cns: %.cns: %.cnr
+giab.cns giab-thin.cns: %.cns: %.cnr
 	cnvkit.py segment $< -o $@
+
+giab.call.cns giab-thin.call.cns: %.call.cns: %.cns
+	cnvkit.py call -t=-1.1,-0.4,0.3,0.7 -g f $< -o $@
+
+giab.bed giab-thin.bed: %.bed: %.call.cns
+	cnvkit.py export bed -g f --show variant $< -o $@
+
+giab.p0.bed giab-thin.p0.bed: %.p0.bed: %.bed
+	cat $< | awk -f p0.awk > $@
+
+giab.p1.bed giab-thin.p1.bed: %.p1.bed: %.bed
+	cat $< | awk -f p1.awk > $@
+
+giab.del.bed giab-thin.del.bed: %.del.bed: %.bed
+	cat $< | awk -f del.awk > $@
 
 
 # Benchmark
