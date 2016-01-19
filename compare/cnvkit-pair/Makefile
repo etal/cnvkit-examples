@@ -15,7 +15,7 @@ tr_references=$(patsubst %_T_pair.cnr,reference-%.cnn,$(tr_cnrs))
 ex_tcnn=$(wildcard ../../exome/EX*.targetcoverage.cnn)
 ex_cnrs=$(patsubst ../../exome/%.targetcoverage.cnn,%_pair.cnr,$(filter %_T.targetcoverage.cnn,$(ex_tcnn)))
 ex_segs=$(ex_cnrs:.cnr=.cns)
-ex_orig_ref=../../reference-ex.cnn
+ex_orig_ref=../../reference-exome.cnn
 ex_references=$(patsubst %_T_pair.cnr,reference-%.cnn,$(ex_cnrs))
 
 all: tr ex

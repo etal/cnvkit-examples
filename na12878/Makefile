@@ -69,6 +69,9 @@ giab.p1.bed giab-thin.p1.bed: %.p1.bed: %.bed
 giab.del.bed giab-thin.del.bed: %.del.bed: %.bed
 	cat $< | awk -f del.awk > $@
 
+intersect.del.bed: giab.del.bed
+	bedtools intersect -wao -g ../intervals/hg19.genome \
+		-a $< -b giab-svclassify-deletions-2015-05-22.bed > $@
 
 # Benchmark
 # giab-svclassify-deletions-2015-05-22.bed
