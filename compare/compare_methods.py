@@ -69,21 +69,18 @@ if __name__ == '__main__':
     df = pd.concat([
         as_dframe(args.cnvkit_pool_tr, 'CNVkit\npooled', 'TR'),
         as_dframe(args.cnvkit_pool_ex, 'CNVkit\npooled', 'EX'),
-        as_dframe(args.contra_pool_tr, 'CONTRA\npooled', 'TR'),
-        as_dframe(args.contra_pool_ex, 'CONTRA\npooled', 'EX'),
-
         as_dframe(args.cnvkit_pair_tr, 'CNVkit\npaired', 'TR'),
         as_dframe(args.cnvkit_pair_ex, 'CNVkit\npaired', 'EX'),
-        as_dframe(args.copywriter_pair_tr, 'CopywriteR\npaired', 'TR'),
-        as_dframe(args.copywriter_pair_ex, 'CopywriteR\npaired', 'EX'),
-        as_dframe(args.contra_pair_tr, 'CONTRA\npaired', 'TR'),
-        as_dframe(args.contra_pair_ex, 'CONTRA\npaired', 'EX'),
-
         as_dframe(args.cnvkit_flat_tr, 'CNVkit\nno ref.', 'TR'),
         as_dframe(args.cnvkit_flat_ex, 'CNVkit\nno ref.', 'EX'),
+        as_dframe(args.copywriter_pair_tr, 'CopywriteR\npaired', 'TR'),
+        as_dframe(args.copywriter_pair_ex, 'CopywriteR\npaired', 'EX'),
         as_dframe(args.copywriter_noref_tr, 'CopywriteR\nno ref.', 'TR'),
         as_dframe(args.copywriter_noref_ex, 'CopywriteR\nno ref.', 'EX'),
-
+        as_dframe(args.contra_pool_tr, 'CONTRA\npooled', 'TR'),
+        as_dframe(args.contra_pool_ex, 'CONTRA\npooled', 'EX'),
+        as_dframe(args.contra_pair_tr, 'CONTRA\npaired', 'TR'),
+        as_dframe(args.contra_pair_ex, 'CONTRA\npaired', 'EX'),
     ])
 
     # Cohorts split, methods in subplots
