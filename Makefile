@@ -40,7 +40,7 @@ ex_segs := $(ex_cnrs:.cnr=.cns)
 # ------------------------------------------------------------------------------
 #  Action!
 
-all: cl tr ex
+all: cl tr ex cl_stats.txt
 
 
 .PHONY: cl
@@ -152,3 +152,12 @@ TR_95_T-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 TR_95_T-CDK4-MDM2-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 	cnvkit.py scatter -s $^ -o $@ -c chr12:50000000-80000000 -g CDK4,MDM2
 
+
+# Cell line benchmark
+
+$(cl_segs:.cns=.bed): %.bed: %.cns
+	cnvkit.py export bed $< --ploidy 6 --show all -g f -y -o $@
+
+cl_stats.txt: $(cl_segs:.cns=.bed)
+	# TODO
+	echo $^ > $@
