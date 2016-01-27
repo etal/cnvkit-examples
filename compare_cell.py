@@ -11,7 +11,7 @@ import pandas as pd
 import seaborn as sn
 from matplotlib import pyplot as plt
 
-sn.set_style("darkgrid")
+sn.set(style="darkgrid", palette="Blues")
 
 
 def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
@@ -53,12 +53,6 @@ if __name__ == '__main__':
     print("File", "Mean", "Spread", "Limit", "Low95", "Median", "High95",
           "MaxAbs", "N", sep='\t')
 
-    # my_colors = sn.color_palette(
-    #     sn.color_palette("Blues")[1:4] +
-    #     ["khaki", "gold"] +
-    #     sn.color_palette("Reds")[2:4],
-    #     7)
-
     df = pd.concat([
         as_dframe(args.cnvkit_pool, 'CNVkit\npooled', 'CL'),
         # as_dframe(args.cnvkit_pair, 'CNVkit\npaired', 'CL'),
@@ -70,16 +64,12 @@ if __name__ == '__main__':
     ])
 
     # Cohorts split, methods in subplots
-    grid = sn.FacetGrid(df, 
-                        row="Cohort", row_order=['CL'],
-                        # aspect=2.5,
-                        size=3.5, ylim=(-.25, .45),
-                        margin_titles=True)
-    (grid.map(sn.violinplot, "Method", "Difference", inner='quartile',
-              # palette=my_colors,
-              cut=0, gridsize=1000, linewidth=1, width=0.95)
-     .set_ylabels("Difference from aCGH")
-    )
+    _fig, ax = plt.subplots(figsize=(4.5, 5.0),
+                            subplot_kw={"ylim": (-.25, .65)})
+    sn.violinplot("Method", "Difference", inner="quartile",
+                  cut=0, gridsize=1000, linewidth=1, width=0.95,
+                  axis=ax, data=df)
+    ax.set_ylabel("Difference from aCGH")
 
     if args.output:
         plt.savefig(args.output, format='pdf', bbox_inches="tight")
