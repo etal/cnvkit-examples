@@ -6,6 +6,7 @@ compare/cnvkit-flat/*.cnr
 compare/cnvkit-flat/*.cns
 compare/cnvkit-pair/*.cnr
 compare/cnvkit-pair/*.cns
+compare/cnvkit-pair/reference-*.cnn
 compare/contra-pair/*.cnr
 compare/contra-pair/*.cns
 compare/contra-pool/*.cnr

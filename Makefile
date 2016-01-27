@@ -40,7 +40,7 @@ ex_segs := $(ex_cnrs:.cnr=.cns)
 # ------------------------------------------------------------------------------
 #  Action!
 
-all: cl tr ex cl_stats.txt
+all: cl tr ex cl_compare.pdf
 
 
 .PHONY: cl
@@ -155,9 +155,26 @@ TR_95_T-CDK4-MDM2-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 
 # Cell line benchmark
 
+int_cl := intervals/cell-baits.bed
+cl_num := seq seq_flat
+cl_compare=$(patsubst %,build/CL_%.cnvkit.csv,$(cl_num))
+
+$(cl_compare): build/%.cnvkit.csv: compare/pair_segments.py build/CL_acgh.cns build/%.cns
+	python $^ -i $(int_cl) -o $@
+
+cl-cnvkit-pool.diffs.dat: compare/alt.py build/CL_seq.cnvkit.csv
+	python $^ -n cl-cnvkit-pool
+
+cl-cnvkit-flat.diffs.dat: compare/alt.py build/CL_seq_flat.cnvkit.csv
+	python $^ -n cl-cnvkit-flat
+
 $(cl_segs:.cns=.bed): %.bed: %.cns
 	cnvkit.py export bed $< --ploidy 6 --show all -g f -y -o $@
 
-cl_stats.txt: $(cl_segs:.cns=.bed)
-	# TODO
-	echo $^ > $@
+cl_compare.pdf: compare_cell.py cl-cnvkit-pool.diffs.dat cl-cnvkit-flat.diffs.dat
+	python $^ -o $@ > cl_compare.stats.csv
+
+# cl_stats.txt: $(cl_segs:.cns=.bed) cl-cnvkit.diffs.dat
+#         # TODO - more calculations
+#         echo $^ > $@
+

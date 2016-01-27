@@ -70,7 +70,7 @@ def segment_cn(segset):
 
 def interval2genes(interval):
     """Squash intervals into named genes."""
-    rarr = RA.read(interval, fmt="interval").autosomes()
+    rarr = RA.read(interval).autosomes()
     ignore_mask = rarr.data.name.isin(params.IGNORE_GENE_NAMES)
     rarr = rarr[~ignore_mask]
 
