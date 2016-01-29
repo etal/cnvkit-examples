@@ -29,8 +29,7 @@ Column names::
 
 import argparse
 import pandas as pd
-from cnvlib.cnarray import CopyNumArray as CNA
-from cnvlib.core import fbase
+from cnvlib.cnary import CopyNumArray as CNA
 
 
 AP = argparse.ArgumentParser(description=__doc__)
@@ -38,13 +37,12 @@ AP.add_argument('contra_table')
 AP.add_argument('-o', '--output')
 args = AP.parse_args()
 
-
 d = pd.read_table(args.contra_table)
-cnarr = CNA.from_columns(fbase(args.output),
-                         chromosome=d['Chr'],
-                         start=d['OriStCoordinate'],
-                         end=d['OriEndCoordinate'],
-                         gene=d['Gene.Sym'],
-                         coverage=d['Adjusted.Mean.of.LogRatio'])
+cnarr = CNA.from_columns(dict(
+    chromosome=d['Chr'],
+    start=d['OriStCoordinate'],
+    end=d['OriEndCoordinate'],
+    gene=d['Gene.Sym'],
+    log2=d['Adjusted.Mean.of.LogRatio']))
 cnarr.sort()
 cnarr.write(args.output)
