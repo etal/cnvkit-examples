@@ -33,9 +33,10 @@ did-import-cl: cl-segment.seg
 	cnvkit.py import-seg -p chr -c human $<
 	rm -vf *_N.bam.vs.*
 	bash rename-pair.sh log2*.vs.log2.MB*.cns
-	mv -vf BB08_LA.cw-pair.cns CL_seq.cw-pair.cns
+	mv -vf BB08_LA.cw-pair.cns CL.cw-pair.cns
 	bash rename-noref.sh log2*.vs.none.cns
-	mv -vf BB08_LA.cw-noref.cns CL_seq.cw-noref.cns
+	mv -vf BB08_LA.cw-noref.cns CL.cw-noref.cns
+	touch $@
 
 $(ex_cns): %.cw-pair.cns: %.seg
 	cnvkit.py import-seg -p chr -c human $<
