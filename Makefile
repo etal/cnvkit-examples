@@ -10,8 +10,7 @@ refgenome_ucsc := ~/db/ucsc.hg19.fasta
 cl_ref_cnns := $(wildcard cell/normal/*_N.*.cnn)
 cl_tcnn := cell/CL_seq.targetcoverage.cnn
 cl_cnrs := build/CL_seq.cnr build/CL_acgh.cnr
-cl_cnrs_flat := build/CL_seq_flat.cnr
-cl_segs := $(cl_cnrs:.cnr=.cns) $(cl_cnrs_flat:.cnr=.cns)
+cl_segs := $(cl_cnrs:.cnr=.cns)
 
 
 # ------------------------------------------------------------------------------
@@ -96,9 +95,6 @@ build/CL_seq.cnr: build/%.cnr: cell/%.targetcoverage.cnn cell/%.antitargetcovera
 build/CL_acgh.cnr: cell/CL_acgh.cnr
 	cp $< $@
 
-$(cl_cnrs_flat): build/%_flat.cnr: cell/%.targetcoverage.cnn cell/%.antitargetcoverage.cnn intervals/reference-cl-flat.cnn
-	cnvkit.py fix $^ -o $@
-
 $(tr_thin_cnrs): build/%.cnr: tr-thin/%.targetcoverage.cnn tr-thin/%.antitargetcoverage.cnn reference-tr-thin.cnn
 	cnvkit.py fix $^ -o $@
 
@@ -156,8 +152,7 @@ TR_95_T-CDK4-MDM2-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 # Cell line benchmark
 
 int_cl := intervals/cell-baits.bed
-cl_num := seq seq_flat
-cl_compare=$(patsubst %,build/CL_%.cnvkit.csv,$(cl_num))
+cl_compare=build/CL_seq.cnvkit.csv
 
 $(cl_compare): build/%.cnvkit.csv: compare/pair_segments.py build/CL_acgh.cns build/%.cns
 	python $^ -i $(int_cl) -o $@
@@ -165,13 +160,10 @@ $(cl_compare): build/%.cnvkit.csv: compare/pair_segments.py build/CL_acgh.cns bu
 cl-cnvkit-pool.diffs.dat: compare/alt.py build/CL_seq.cnvkit.csv
 	python $^ -n cl-cnvkit-pool
 
-cl-cnvkit-flat.diffs.dat: compare/alt.py build/CL_seq_flat.cnvkit.csv
-	python $^ -n cl-cnvkit-flat
-
 $(cl_segs:.cns=.bed): %.bed: %.cns
 	cnvkit.py export bed $< --ploidy 6 --show all -g f -y -o $@
 
-cl_compare.pdf: compare_cell.py cl-cnvkit-pool.diffs.dat cl-cnvkit-flat.diffs.dat
+cl_compare.pdf: compare_cell.py cl-cnvkit-pool.diffs.dat
 	python $^ -o $@ > cl_compare.stats.csv
 
 # cl_stats.txt: $(cl_segs:.cns=.bed) cl-cnvkit.diffs.dat

@@ -41,7 +41,7 @@ if __name__ == '__main__':
     AP = argparse.ArgumentParser(description=__doc__)
     AP.add_argument("cnvkit_pool", help="CNVkit (CL cohort, pooled)")
     # AP.add_argument("cnvkit_pair", help="CNVkit (TR cohort, paired)")
-    AP.add_argument("cnvkit_flat", help="CNVkit (CL cohort, flat ref.)")
+    # AP.add_argument("cnvkit_flat", help="CNVkit (CL cohort, flat ref.)")
     # AP.add_argument("copywriter_pair", help="CopywriteR (TR cohort, paired)")
     # AP.add_argument("copywriter_noref", help="CopywriteR (TR cohort, no ref.)")
     # AP.add_argument("contra_pool", help="CONTRA (TR cohort, pooled)")
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     df = pd.concat([
         as_dframe(args.cnvkit_pool, 'CNVkit\npooled', 'CL'),
         # as_dframe(args.cnvkit_pair, 'CNVkit\npaired', 'CL'),
-        as_dframe(args.cnvkit_flat, 'CNVkit\nno ref.', 'CL'),
+        # as_dframe(args.cnvkit_flat, 'CNVkit\nno ref.', 'CL'),
         # as_dframe(args.copywriter_pair, 'CopywriteR\npaired', 'CL'),
         # as_dframe(args.copywriter_noref, 'CopywriteR\nno ref.', 'CL'),
         # as_dframe(args.contra_pool, 'CONTRA\npooled', 'CL'),
