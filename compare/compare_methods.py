@@ -32,7 +32,13 @@ def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
               sep='\t')
     else:
         # Dummy data
+        print("Dummy data for:", cohort, method, file=sys.stderr)
         arr = np.random.triangular(ymin, 0, ymax, 300)
+    return pd.DataFrame({"Difference": arr, "Method": method, "Cohort": cohort})
+
+
+def blank_dframe(method, cohort):
+    arr = np.zeros(1, dtype=np.float_)
     return pd.DataFrame({"Difference": arr, "Method": method, "Cohort": cohort})
 
 
@@ -40,19 +46,27 @@ if __name__ == '__main__':
     import argparse
     AP = argparse.ArgumentParser(description=__doc__)
     AP.add_argument("cnvkit_pool_tr", help="CNVkit (TR cohort, pooled)")
-    AP.add_argument("cnvkit_pool_ex", help="CNVkit (EX cohort, pooled)")
     AP.add_argument("cnvkit_pair_tr", help="CNVkit (TR cohort, paired)")
-    AP.add_argument("cnvkit_pair_ex", help="CNVkit (EX cohort, paired)")
     AP.add_argument("cnvkit_flat_tr", help="CNVkit (TR cohort, flat ref.)")
-    AP.add_argument("cnvkit_flat_ex", help="CNVkit (EX cohort, flat ref.)")
     AP.add_argument("copywriter_pair_tr", help="CopywriteR (TR cohort, paired)")
-    AP.add_argument("copywriter_pair_ex", help="CopywriteR (EX cohort, paired)")
     AP.add_argument("copywriter_noref_tr", help="CopywriteR (TR cohort, no ref.)")
-    AP.add_argument("copywriter_noref_ex", help="CopywriteR (EX cohort, no ref.)")
     AP.add_argument("contra_pool_tr", help="CONTRA (TR cohort, pooled)")
-    AP.add_argument("contra_pool_ex", help="CONTRA (EX cohort, pooled)")
     AP.add_argument("contra_pair_tr", help="CONTRA (TR cohort, paired)")
+
+    AP.add_argument("cnvkit_pool_ex", help="CNVkit (EX cohort, pooled)")
+    AP.add_argument("cnvkit_pair_ex", help="CNVkit (EX cohort, paired)")
+    AP.add_argument("cnvkit_flat_ex", help="CNVkit (EX cohort, flat ref.)")
+    AP.add_argument("copywriter_pair_ex", help="CopywriteR (EX cohort, paired)")
+    AP.add_argument("copywriter_noref_ex", help="CopywriteR (EX cohort, no ref.)")
+    AP.add_argument("contra_pool_ex", help="CONTRA (EX cohort, pooled)")
     AP.add_argument("contra_pair_ex", help="CONTRA (EX cohort, paired)")
+
+    AP.add_argument("cnvkit_pool_cl", help="CNVkit (CL cohort, pooled)")
+    AP.add_argument("cnvkit_flat_cl", help="CNVkit (CL cohort, flat ref.)")
+    AP.add_argument("copywriter_pair_cl", help="CopywriteR (CL cohort, paired)")
+    AP.add_argument("copywriter_noref_cl", help="CopywriteR (CL cohort, no ref.)")
+    AP.add_argument("contra_pair_cl", help="CONTRA (CL cohort, paired)")
+
     AP.add_argument("-o", "--output", help="Output PDF filename.")
     args = AP.parse_args()
 
@@ -68,23 +82,33 @@ if __name__ == '__main__':
 
     df = pd.concat([
         as_dframe(args.cnvkit_pool_tr, 'CNVkit\npooled', 'TR'),
-        as_dframe(args.cnvkit_pool_ex, 'CNVkit\npooled', 'EX'),
         as_dframe(args.cnvkit_pair_tr, 'CNVkit\npaired', 'TR'),
-        as_dframe(args.cnvkit_pair_ex, 'CNVkit\npaired', 'EX'),
         as_dframe(args.cnvkit_flat_tr, 'CNVkit\nno ref.', 'TR'),
-        as_dframe(args.cnvkit_flat_ex, 'CNVkit\nno ref.', 'EX'),
         as_dframe(args.copywriter_pair_tr, 'CopywriteR\npaired', 'TR'),
-        as_dframe(args.copywriter_pair_ex, 'CopywriteR\npaired', 'EX'),
         as_dframe(args.copywriter_noref_tr, 'CopywriteR\nno ref.', 'TR'),
-        as_dframe(args.copywriter_noref_ex, 'CopywriteR\nno ref.', 'EX'),
         as_dframe(args.contra_pool_tr, 'CONTRA\npooled', 'TR'),
-        as_dframe(args.contra_pool_ex, 'CONTRA\npooled', 'EX'),
         as_dframe(args.contra_pair_tr, 'CONTRA\npaired', 'TR'),
+
+        as_dframe(args.cnvkit_pool_ex, 'CNVkit\npooled', 'EX'),
+        as_dframe(args.cnvkit_pair_ex, 'CNVkit\npaired', 'EX'),
+        as_dframe(args.cnvkit_flat_ex, 'CNVkit\nno ref.', 'EX'),
+        as_dframe(args.copywriter_pair_ex, 'CopywriteR\npaired', 'EX'),
+        as_dframe(args.copywriter_noref_ex, 'CopywriteR\nno ref.', 'EX'),
+        as_dframe(args.contra_pool_ex, 'CONTRA\npooled', 'EX'),
         as_dframe(args.contra_pair_ex, 'CONTRA\npaired', 'EX'),
+
+        as_dframe(args.cnvkit_pool_cl, 'CNVkit\npooled', 'CL'),
+        blank_dframe('CNVkit\npaired', 'CL'),
+        as_dframe(args.cnvkit_flat_cl, 'CNVkit\nno ref.', 'CL'),
+        as_dframe(args.copywriter_pair_cl, 'CopywriteR\npaired', 'CL'),
+        as_dframe(args.copywriter_noref_cl, 'CopywriteR\nno ref.', 'CL'),
+        blank_dframe('CONTRA\npooled', 'CL'),
+        as_dframe(args.contra_pair_cl, 'CONTRA\npaired', 'CL'),
+
     ])
 
     # Cohorts split, methods in subplots
-    grid = sn.FacetGrid(df, row="Cohort", row_order=['TR', 'EX'],
+    grid = sn.FacetGrid(df, row="Cohort", row_order=['TR', 'EX', 'CL'],
                         aspect=2.5, size=3.5, ylim=(-.35, .35),
                         margin_titles=True)
     (grid.map(sn.violinplot, "Method", "Difference", inner='quartile',

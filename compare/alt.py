@@ -17,7 +17,7 @@ from matplotlib import pyplot
 seaborn.set_style("ticks")
 
 # Interquartile range of segmented log2 values in normal TR samples
-NEUTRAL_RANGE = 0.2
+NEUTRAL_RANGE = None
 
 
 def plot_diffs_vs_means(name, diffs, means):
