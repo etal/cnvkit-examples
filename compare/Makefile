@@ -38,7 +38,7 @@ comparison.pdf: compare_methods.py \
 	ex-cnvkit-pool.diffs.dat ex-cnvkit-pair.diffs.dat ex-cnvkit-flat.diffs.dat \
 	ex-copywriter-pair.diffs.dat ex-copywriter-noref.diffs.dat \
 	ex-contra-pool.diffs.dat ex-contra-pair.diffs.dat \
-	cl-cnvkit-pool.diffs.dat cl-cnvkit-flat.diffs.dat \
+	cl-cnvkit-pool.diffs.dat cl-cnvkit-pair.diffs.dat cl-cnvkit-flat.diffs.dat \
 	cl-copywriter-pair.diffs.dat cl-copywriter-noref.diffs.dat \
 	cl-contra-pair.diffs.dat
 	python $^ -o $@ > comparison.stats.csv
@@ -91,7 +91,7 @@ $(tr_ckpair): tables/%.cnvkit-pair.csv: pair_segments.py acgh/%.cns cnvkit-pair/
 $(ex_ckpair): tables/%.cnvkit-pair.csv: pair_segments.py acgh/%.cns cnvkit-pair/%_pair.cns
 	python $^ -i $(int_ex) -o $@
 
-$(cl_conpair): pair_segments.py $(cnvbuild)/CL_acgh.cns cnvkit-pair/CL.cnvkit-pair.cns
+$(cl_ckpair): pair_segments.py $(cnvbuild)/CL_acgh.cns cnvkit-pair/CL_pair.cns
 	python $^ -i $(int_cl) -o $@
 
 

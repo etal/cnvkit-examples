@@ -62,6 +62,7 @@ if __name__ == '__main__':
     AP.add_argument("contra_pair_ex", help="CONTRA (EX cohort, paired)")
 
     AP.add_argument("cnvkit_pool_cl", help="CNVkit (CL cohort, pooled)")
+    AP.add_argument("cnvkit_pair_cl", help="CNVkit (CL cohort, paired)")
     AP.add_argument("cnvkit_flat_cl", help="CNVkit (CL cohort, flat ref.)")
     AP.add_argument("copywriter_pair_cl", help="CopywriteR (CL cohort, paired)")
     AP.add_argument("copywriter_noref_cl", help="CopywriteR (CL cohort, no ref.)")
@@ -98,7 +99,7 @@ if __name__ == '__main__':
         as_dframe(args.contra_pair_ex, 'CONTRA\npaired', 'EX'),
 
         as_dframe(args.cnvkit_pool_cl, 'CNVkit\npooled', 'CL'),
-        blank_dframe('CNVkit\npaired', 'CL'),
+        as_dframe(args.cnvkit_pair_cl, 'CNVkit\npaired', 'CL'),
         as_dframe(args.cnvkit_flat_cl, 'CNVkit\nno ref.', 'CL'),
         as_dframe(args.copywriter_pair_cl, 'CopywriteR\npaired', 'CL'),
         as_dframe(args.copywriter_noref_cl, 'CopywriteR\nno ref.', 'CL'),

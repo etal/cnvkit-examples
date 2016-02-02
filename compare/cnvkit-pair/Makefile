@@ -18,7 +18,13 @@ ex_segs=$(ex_cnrs:.cnr=.cns)
 ex_orig_ref=../../reference-exome.cnn
 ex_references=$(patsubst %_T_pair.cnr,reference-%.cnn,$(ex_cnrs))
 
-all: tr ex
+cl_cnrs=CL_pair.cnr
+cl_segs=$(cl_cnrs:.cnr=.cns)
+cl_orig_ref=../../reference-cell.cnn
+cl_references=reference-CL.cnn
+
+
+all: tr ex cl
 
 .PHONY: tr
 tr: heatmap-tr-paired.pdf
@@ -26,8 +32,11 @@ tr: heatmap-tr-paired.pdf
 .PHONY: ex
 ex: $(ex_segs) heatmap-ex-paired.pdf
 
+.PHONY: cl
+cl: $(cl_segs)
+
 .PHONY: metrics
-metrics:  metrics-tr-paired.csv metrics-ex-paired.csv
+metrics:  metrics-tr-paired.csv metrics-ex-paired.csv metrics-cl-paired.csv
 
 .PHONY: clean
 clean:
@@ -47,6 +56,11 @@ $(ex_references): reference-%.cnn: ../../exome/%_N.targetcoverage.cnn ../../exom
 	python ../add_gc_rmask.py $(ex_orig_ref) $@.tmp.cnn -o $@
 	rm $@.tmp.cnn
 
+$(cl_references): ../../cell/normal/MB_1454_N.targetcoverage.cnn ../../cell/normal/MB_1454_N.antitargetcoverage.cnn
+	cnvkit.py reference $^ -y -o $@.tmp.cnn
+	python ../add_gc_rmask.py $(cl_orig_ref) $@.tmp.cnn -o $@
+	rm $@.tmp.cnn
+
 
 $(tr_cnrs): %_T_pair.cnr: ../../targeted/%_T.targetcoverage.cnn ../../targeted/%_T.antitargetcoverage.cnn reference-%.cnn
 	cnvkit.py fix $^ -o $@
@@ -54,8 +68,11 @@ $(tr_cnrs): %_T_pair.cnr: ../../targeted/%_T.targetcoverage.cnn ../../targeted/%
 $(ex_cnrs): %_T_pair.cnr: ../../exome/%_T.targetcoverage.cnn ../../exome/%_T.antitargetcoverage.cnn reference-%.cnn
 	cnvkit.py fix $^ -o $@
 
+$(cl_cnrs): ../../cell/CL_seq.targetcoverage.cnn ../../cell/CL_seq.antitargetcoverage.cnn reference-CL.cnn
+	cnvkit.py fix $^ -o $@
 
-$(tr_segs) $(ex_segs): %.cns: %.cnr
+
+$(cl_segs) $(tr_segs) $(ex_segs): %.cns: %.cnr
 	cnvkit.py segment $< -o $@
 
 
@@ -64,6 +81,9 @@ metrics-tr-paired.csv: $(tr_segs)
 
 metrics-ex-paired.csv: $(ex_segs)
 	cnvkit.py metrics $(ex_cnrs) -s $^ -o $@
+
+metrics-cl-paired.csv: $(cl_segs)
+	cnvkit.py metrics $(cl_cnrs) -s $^ -o $@
 
 
 heatmap-tr-paired.pdf: $(tr_segs)
