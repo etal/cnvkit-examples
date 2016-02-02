@@ -40,7 +40,7 @@ comparison.pdf: compare_methods.py \
 	ex-contra-pool.diffs.dat ex-contra-pair.diffs.dat \
 	cl-cnvkit-pool.diffs.dat cl-cnvkit-pair.diffs.dat cl-cnvkit-flat.diffs.dat \
 	cl-copywriter-pair.diffs.dat cl-copywriter-noref.diffs.dat \
-	cl-contra-pair.diffs.dat
+	cl-contra-pool.diffs.dat cl-contra-pair.diffs.dat
 	python $^ -o $@ > comparison.stats.csv
 
 
@@ -124,6 +124,7 @@ $(cl_ckflat): pair_segments.py $(cnvbuild)/CL_acgh.cns cnvkit-flat/CL_flat.cns
 
 tr_conpool=$(patsubst %,tables/TR_%_T.contra-pool.csv,$(tr_num))
 ex_conpool=$(patsubst %,tables/EX_%_T.contra-pool.csv,$(ex_num))
+cl_conpool=tables/CL.contra-pool.csv
 
 tr-contra-pool.diffs.dat: alt.py $(tr_conpool)
 	python $^ -n tr-contra-pool
@@ -131,11 +132,18 @@ tr-contra-pool.diffs.dat: alt.py $(tr_conpool)
 ex-contra-pool.diffs.dat: alt.py $(ex_conpool)
 	python $^ -n ex-contra-pool
 
+cl-contra-pool.diffs.dat: alt.py $(cl_conpool)
+	python $^ -n cl-contra-pool
+
 $(tr_conpool): tables/%.contra-pool.csv: pair_segments.py acgh/%.cns contra-pool/%.contra-pool.cns
 	python $^ -i $(int_tr) -o $@
 
 $(ex_conpool): tables/%.contra-pool.csv: pair_segments.py acgh/%.cns contra-pool/%.contra-pool.cns
 	python $^ -i $(int_ex) -o $@
+
+$(cl_conpool): pair_segments.py $(cnvbuild)/CL_acgh.cns contra-pool/CL.contra-pool.cns
+	python $^ -i $(int_cl) -o $@
+
 
 # CONTRA, paired normal references
 

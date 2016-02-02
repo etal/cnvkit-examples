@@ -66,6 +66,7 @@ if __name__ == '__main__':
     AP.add_argument("cnvkit_flat_cl", help="CNVkit (CL cohort, flat ref.)")
     AP.add_argument("copywriter_pair_cl", help="CopywriteR (CL cohort, paired)")
     AP.add_argument("copywriter_noref_cl", help="CopywriteR (CL cohort, no ref.)")
+    AP.add_argument("contra_pool_cl", help="CONTRA (CL cohort, pooled)")
     AP.add_argument("contra_pair_cl", help="CONTRA (CL cohort, paired)")
 
     AP.add_argument("-o", "--output", help="Output PDF filename.")
@@ -103,7 +104,7 @@ if __name__ == '__main__':
         as_dframe(args.cnvkit_flat_cl, 'CNVkit\nno ref.', 'CL'),
         as_dframe(args.copywriter_pair_cl, 'CopywriteR\npaired', 'CL'),
         as_dframe(args.copywriter_noref_cl, 'CopywriteR\nno ref.', 'CL'),
-        blank_dframe('CONTRA\npooled', 'CL'),
+        as_dframe(args.contra_pool_cl, 'CONTRA\npooled', 'CL'),
         as_dframe(args.contra_pair_cl, 'CONTRA\npaired', 'CL'),
 
     ])
