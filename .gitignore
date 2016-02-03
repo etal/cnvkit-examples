@@ -1,5 +1,8 @@
 # Stuff I don't want to see
+*.cnn.1
 build/
+compare/*.alt.pdf
+compare/*.diffs.dat
 compare/acgh/*.cnr
 compare/acgh/*.cns
 compare/cnvkit-flat/*.cnr
@@ -12,8 +15,7 @@ compare/contra-pair/*.cns
 compare/contra-pool/*.cnr
 compare/contra-pool/*.cns
 compare/copywriter/*.cns
-compare/*.alt.pdf
-*.cnn.1
+compare/copywriter/*.seg
 
 # Compiled python files
 *.pyc
