@@ -38,10 +38,6 @@ def read_paired_genes(cbs1, cbs2, interval):
     genes = interval2genes(interval)
     print("#Genes tiled:", len(genes), file=sys.stderr)
 
-    # Remove the 'chr' prefix from target gene chromosome name
-    # if segments1.chromosome[0].startswith('chr'):
-    #     segments1["chromosome"] = segments1.chromosome.str.slice(3)
-
     genes["value1"] = [segment_cn(sel)
                        for (_r, sel) in segments1.by_ranges(genes, mode="trim")]
     genes["value2"] = [segment_cn(sel)
@@ -68,14 +64,17 @@ def segment_cn(segset):
         return segset.log2.median()
 
 
-def interval2genes(interval):
+# ENH - port to GA/CNA.by_genes, .squash_genes
+def interval2genes(interval, min_gene_size=200):
     """Squash intervals into named genes."""
     rarr = RA.read(interval).autosomes()
-    ignore_mask = rarr.data.name.isin(params.IGNORE_GENE_NAMES)
-    rarr = rarr[~ignore_mask]
+    rarr = rarr[~rarr.data.name.isin(params.IGNORE_GENE_NAMES + ("Background",))]
 
-    # TODO - just filter the dataframe  & return it directly
-    #   use by_genes or CNA.squash_genes
+    # XXX This will combine non-adjacent genes w/ same name
+    # gb = rarr.data.groupby(["chromosome", "name"], as_index=False, sort=False)
+    # ag = gb.aggregate({'start': np.min, 'end': np.max})
+    # return rarr.as_dataframe(ag)
+
     curr_name = None
     curr_chrom = None
     curr_start = None
@@ -84,7 +83,10 @@ def interval2genes(interval):
     out_rows = []
     for chrom, start, end, name in rarr.coords(also=["name"]):
         if chrom != curr_chrom or name != curr_name:
-            if curr_name is not None:
+            if (curr_name is not None
+                # Skip CGH probes that are not real targeted genes
+                and (curr_len > 1 or curr_end - curr_start >= min_gene_size)
+               ):
                 out_rows.append((curr_chrom, curr_start, curr_end, curr_name))
             # Reset
             curr_name = name
@@ -96,7 +98,6 @@ def interval2genes(interval):
         curr_len += 1
     if curr_name is not None and curr_len >= 1:
         out_rows.append((curr_chrom, curr_start, curr_end, curr_name))
-
     return RA.from_rows(out_rows,
                         columns=["chromosome", "start", "end", "label"])
 
