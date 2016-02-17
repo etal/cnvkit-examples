@@ -105,7 +105,7 @@ $(ex_cnrs): build/%.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.c
 	cnvkit.py fix $^ -o $@
 
 $(cl_segs) $(tr_thin_segs) $(tr_segs) $(ex_segs): %.cns: %.cnr
-	cnvkit.py segment --drop-outliers 10 $< -o $@
+	cnvkit.py segment --drop-low $< -o $@
 
 
 # == Results

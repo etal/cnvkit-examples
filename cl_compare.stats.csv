@@ -1,2 +1,2 @@
 File	Mean	Spread	Limit	Low95	Median	High95	MaxAbs	N
-cl-cnvkit-pool.diffs.dat	0.048923	0.27922	0.24304	-0.033099	0.030003	0.24612	1.9829	1202
+cl-cnvkit-pool.diffs.dat	0.070527	0.30944	0.34399	-0.0075745	0.042651	0.30186	1.9515	383
