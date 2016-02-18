@@ -46,7 +46,7 @@ CL_flat.cnr: ../../cell/CL_seq.targetcoverage.cnn ../../cell/CL_seq.antitargetco
 	cnvkit.py fix $^ -o $@
 
 CL_flat.cns $(tr_segs_flat) $(ex_segs_flat): %.cns: %.cnr
-	cnvkit.py segment $< -o $@
+	cnvkit.py segment --drop-low $< -o $@
 
 
 metrics-tr-flat.csv: $(tr_segs_flat)

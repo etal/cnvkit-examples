@@ -73,7 +73,7 @@ $(cl_cnrs): ../../cell/CL_seq.targetcoverage.cnn ../../cell/CL_seq.antitargetcov
 
 
 $(cl_segs) $(tr_segs) $(ex_segs): %.cns: %.cnr
-	cnvkit.py segment $< -o $@
+	cnvkit.py segment --drop-low $< -o $@
 
 
 metrics-tr-paired.csv: $(tr_segs)
