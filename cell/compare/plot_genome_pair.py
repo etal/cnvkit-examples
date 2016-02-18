@@ -13,6 +13,9 @@ from cnvlib import commands, plots
 
 PAD = 1e7
 
+def limit(val, mini, maxi):
+    return min(max(val, mini), maxi)
+
 
 def main(args):
     """."""
@@ -30,16 +33,13 @@ def main(args):
     botax.tick_params(labelbottom=False)
     topax.tick_params(labelbottom=True)
     # Twiddle y-axis limits
-    all_y = numpy.concatenate((segarr.coverage[(segarr.chromosome != 'chrY') &
-                                               (segarr.chromosome != 'chr6')],
-                               asegarr.coverage[(asegarr.chromosome != 'chrY') &
-                                                (asegarr.chromosome != 'chr6')]))
-    topax.set_ylim(plots.limit(min(all_y) - .2, -5.0, -.5),
-                   plots.limit(max(all_y) + .2, .5, 5.0))
+    all_y = numpy.concatenate((segarr.autosomes().log2, asegarr.autosomes().log2))
+    topax.set_ylim(limit(min(all_y) - .2, -5.0, -.5),
+                   limit(max(all_y) + .2, .5, 5.0))
 
     # Draw CNVkit and aCGH scatters
-    plots.plot_genome(botax, acgharr, asegarr, PAD)
-    plots.plot_genome(topax, cnarr, segarr, PAD)
+    plots.cnv_on_genome(botax, acgharr, asegarr, PAD)
+    plots.cnv_on_genome(topax, cnarr, segarr, PAD)
 
     # Save it.
     if args.output:

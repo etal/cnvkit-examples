@@ -15,7 +15,7 @@ from cnvlib import commands, plots
 def get_plot_args(cnarr, segarr, chrom, window_coords):
     sel_probes = cnarr.in_range(chrom, *window_coords)
     print("Selected", len(sel_probes), "probes")
-    sel_segs = segarr.in_range(chrom, *window_coords, trim=True)
+    sel_segs = segarr.in_range(chrom, *window_coords, mode="trim")
     print("sel_segs:\n", sel_segs.data)
     return (sel_probes, sel_segs)
 
@@ -42,6 +42,10 @@ def get_xtick_values(probes):
         if max_tick > max_x:
             max_tick -= 1
         return range(min_tick, max_tick + 1)
+
+
+def limit(val, mini, maxi):
+    return min(max(val, mini), maxi)
 
 
 def main(args):
@@ -77,10 +81,8 @@ def main(args):
     leftax = pyplot.subplot(axgrid[0])
     rightax = pyplot.subplot(axgrid[1], sharex=leftax, sharey=leftax)
 
-    plots.plot_chromosome(leftax, cnv_sel_probes, cnv_sel_segs,
-                          chrom, cnarr.sample_id, genes)
-    plots.plot_chromosome(rightax, acgh_sel_probes, acgh_sel_segs,
-                          chrom, cnarr.sample_id, genes)
+    plots.cnv_on_chromosome(leftax, cnv_sel_probes, cnv_sel_segs, genes)
+    plots.cnv_on_chromosome(rightax, acgh_sel_probes, acgh_sel_segs, genes)
 
     # Tweak aesthetics
     rightax.tick_params(labelleft=False, left=False)
@@ -102,11 +104,11 @@ def main(args):
     # leftax.set_ylim(plots.limit(min(all_y) - .1, -5.0, -.3),
     #                 plots.limit(max(all_y) + .25, .3, 5.0))
     if args.gene_name == 'CDKN2A':
-        all_y = numpy.concatenate((cnv_sel_segs.coverage,
-                                   acgh_sel_segs.coverage))
+        all_y = numpy.concatenate((cnv_sel_segs.log2,
+                                   acgh_sel_segs.log2))
         print("all_y:", tuple(all_y))
-        leftax.set_ylim(plots.limit(min(all_y) - .3, -5.0, -.5),
-                        plots.limit(max(all_y) + .3, .5, 5.0))
+        leftax.set_ylim(limit(min(all_y) - .3, -5.0, -.5),
+                        limit(max(all_y) + .3, .5, 5.0))
     else:
         leftax.set_ylim(-2.1, 1.1)
 

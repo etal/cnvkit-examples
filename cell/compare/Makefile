@@ -22,7 +22,7 @@ all: heatmap.pdf scatters.pdf metrics.tsv
 clean:
 	rm -vf *.pdf metrics.tsv
 
-heatmap.pdf: $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns $(cnvbuild)/CL_seq_flat.cns
+heatmap.pdf: $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns  $(cnvbuild)/../compare/cnvkit-flat/CL_flat.cns
 	cnvkit.py heatmap $^ -d -o $@
 
 scatters.pdf: cell-correlation.pdf cell-correlation-flat.pdf cell-paired-genome.pdf \
@@ -30,7 +30,7 @@ scatters.pdf: cell-correlation.pdf cell-correlation-flat.pdf cell-paired-genome.
 	focal-NTRK1.pdf focal-ALK.pdf focal-ROS1.pdf focal-MET-BRAF.pdf focal-CDKN2A.pdf focal-RET.pdf
 	pdfunite $^ $@
 
-metrics.tsv: $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns $(cnvbuild)/CL_seq_flat.cns
+metrics.tsv: $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns $(cnvbuild)/../compare/cnvkit-flat/CL_flat.cns
 	cnvkit.py metrics $(^:.cns=.cnr) -s $^ -o $@
 
 
@@ -39,7 +39,10 @@ metrics.tsv: $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq.cns $(cnvbuild)/CL_seq_f
 cell-paired-genome.pdf: plot_genome_pair.py $(clseqpair) $(clacghpair)
 	python $^ -o $@
 
-CL_acgh-scatter.pdf CL_seq-scatter.pdf CL_seq_flat-scatter.pdf: %-scatter.pdf: $(cnvbuild)/%.cns $(cnvbuild)/%.cnr
+CL_acgh-scatter.pdf CL_seq-scatter.pdf: %-scatter.pdf: $(cnvbuild)/%.cns $(cnvbuild)/%.cnr
+	cnvkit.py scatter -s $^ -o $@
+
+CL_seq_flat-scatter.pdf: $(cnvbuild)/../compare/cnvkit-flat/CL_flat.cns $(cnvbuild)/../compare/cnvkit-flat/CL_flat.cnr
 	cnvkit.py scatter -s $^ -o $@
 
 # Focal scatter plots -- FISH'd genes
@@ -80,12 +83,12 @@ cell-correlation.csv: pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_se
 cell-correlation-flat.pdf: plot_paired_segments.py cell-correlation-flat.csv
 	python $^ -o $@
 
-cell-correlation-flat.csv: pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq_flat.cns
+cell-correlation-flat.csv: pair_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/../compare/cnvkit-flat/CL_flat.cns
 	python $^ -i $(baits) -o $@
 
 cell-correlation-cut.pdf: plot_paired_segments.py cell-correlation-cut.csv
 	python $^ -o $@
 
-cell-correlation-cut.csv: cut_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/CL_seq_flat.cns
+cell-correlation-cut.csv: cut_segments.py $(cnvbuild)/CL_acgh.cns $(cnvbuild)/../compare/cnvkit-flat/CL_flat.cns
 	python $^ -i $(baits) -o $@
 

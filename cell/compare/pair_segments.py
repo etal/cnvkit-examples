@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Match up and aggregate gene coverages between 2 sets of samples."""
+"""Match up and aggregate gene log2 ratios between 2 sets of samples."""
 from __future__ import division, print_function
 
 import sys
@@ -26,12 +26,10 @@ def read_paired_genes(cbs1, cbs2, interval):
     For genes with 2 or more segments, take the longest segment (or [weighted]
     average).
     """
-    segments1 = cnvlib.read(cbs1)
-    segments2 = cnvlib.read(cbs2)
+    segments1 = cnvlib.read(cbs1).autosomes()
+    segments2 = cnvlib.read(cbs2).autosomes()
     non_overlapping = set(segments1.chromosome).symmetric_difference(
             set(segments2.chromosome))
-    non_overlapping = [chrom for chrom in non_overlapping
-                       if not is_skipped_chromosome(chrom)]
     if non_overlapping:
         raise ValueError("Mismatched chromosomes: " +
                          ' '.join(sorted(non_overlapping)))
@@ -49,8 +47,8 @@ def read_paired_genes(cbs1, cbs2, interval):
         if not has_chr:
             # Remove the 'chr' prefix from target gene chromosome name
             chrom = chrom[3:]
-        sel1 = segments1.in_range(chrom, start, end, trim=True)
-        sel2 = segments2.in_range(chrom, start, end, trim=True)
+        sel1 = segments1.in_range(chrom, start, end, mode='trim')
+        sel2 = segments2.in_range(chrom, start, end, mode='trim')
         if len(sel1) == 0 or len(sel2) == 0:
             print("Skipping", name, "-- not covered by a segment")
             continue
@@ -68,9 +66,9 @@ def segment_cn(segset):
     if len(segset) == 0:
         raise ValueError("WTF: %s" % segset)
     elif len(segset) == 1:
-        return segset.coverage[0]
+        return segset.log2.iat[0]
     else:
-        return np.average(segset.coverage, weights=(segset.end - segset.start))
+        return np.average(segset.log2, weights=(segset.end - segset.start))
 
 
 def interval2genes(interval, skip=('CGH', '-')):
