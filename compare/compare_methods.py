@@ -73,26 +73,15 @@ def load_inputs(args):
     ], ignore_index=True)
 
 
-def as_dframe(fname, method, cohort, ymin=-1.0, ymax=1.0):
+def as_dframe(fname, method, cohort):
     """Load an aCGH-vs-method file as a DataFrame. Print summary stats."""
     if fname and os.stat(fname).st_size > 1:
         arr = np.loadtxt(fname)
         print("Loaded", fname, file=sys.stderr)
-        # # Stats
-        # mean = arr.mean()
-        # limit = 1.96 * arr.std()
-        # low, mid, hi = np.percentile(arr, [2.5, 50.0, 97.5])
-        # spread = hi - low
-        # absmax = np.absolute(arr).max()
-        # n = len(arr)
-        # print(fname, *(["%.5g" % val
-        #                for val in (mean, spread, limit, low, mid, hi, absmax)]
-        #               + [n]),
-        #       sep='\t')
     else:
         # Dummy data
         print("Dummy data for:", cohort, method, file=sys.stderr)
-        arr = np.random.triangular(ymin, 0, ymax, 300)
+        arr = np.random.triangular(-1.0, 0, 1.0, 300)
     return pd.DataFrame({"Difference": arr, "Method": method, "Cohort": cohort})
 
 
@@ -114,16 +103,10 @@ def make_plot(data):
                         aspect=1.8, size=3.4,
                         ylim=(-Y_RANGE, Y_RANGE),
                         margin_titles=True)
-    # return (grid.map(sn.violinplot, "Method", "Difference", inner='quartile',
-    #                  cut=0, gridsize=1000, bw=0.08, #"silverman",
-    #                  palette=my_colors, linewidth=1, width=0.95)
-    #         .set_ylabels("Difference from aCGH")
-    #        )
     return (grid.map(sn.boxplot, "Method", "Difference",
                      sym='', whis=[2.5, 97.5],
                      palette=my_colors, linewidth=1, width=0.7)
-            .set_ylabels("Difference from aCGH")
-           )
+            .set_ylabels("Difference from aCGH"))
 
 
 

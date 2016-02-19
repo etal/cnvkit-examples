@@ -43,7 +43,7 @@ all: cl tr ex cl_compare.pdf
 
 
 .PHONY: cl
-cl: heatmap-cl.pdf
+cl: heatmap-cl.pdf $(cl_segs:.cns=.bed) cl_compare.pdf
 
 .PHONY: tr
 tr: heatmap-tr.pdf TR_95_T-diagram.pdf TR_95_T-scatter.pdf TR_95_T-CDK4-MDM2-scatter.pdf
@@ -157,16 +157,9 @@ cl_compare=build/CL_seq.cnvkit.csv
 $(cl_compare): build/%.cnvkit.csv: compare/pair_segments.py build/CL_acgh.cns build/%.cns
 	python $^ -i $(int_cl) -o $@
 
-cl-cnvkit-pool.diffs.dat: compare/alt.py build/CL_seq.cnvkit.csv
-	python $^ -n cl-cnvkit-pool
-
-$(cl_segs:.cns=.bed): %.bed: %.cns
-	cnvkit.py export bed $< --ploidy 6 --show all -g f -y -o $@
-
-cl_compare.pdf: compare_cell.py cl-cnvkit-pool.diffs.dat
+cl_compare.pdf: compare_cell.py compare/cl-cnvkit-pool.diffs.dat compare/cl-cnvkit-pair.diffs.dat compare/cl-cnvkit-flat.diffs.dat
 	python $^ -o $@ > cl_compare.stats.csv
 
-# cl_stats.txt: $(cl_segs:.cns=.bed) cl-cnvkit.diffs.dat
-#         # TODO - more calculations
-#         echo $^ > $@
+$(cl_segs:.cns=.bed): %.bed: %.cns
+	cnvkit.py export bed $< --ploidy 6 --show ploidy -g f -y -o $@
 

@@ -23,7 +23,7 @@ tr: heatmap-tr-flat.pdf
 ex: heatmap-ex-flat.pdf
 
 .PHONY: cl
-cl: CL_flat.cns
+cl: CL_flat.cns CL_flat.bed
 
 .PHONY: metrics
 metrics: metrics-tr-flat.csv metrics-ex-flat.csv metrics-cl-flat.csv
@@ -47,6 +47,9 @@ CL_flat.cnr: ../../cell/CL_seq.targetcoverage.cnn ../../cell/CL_seq.antitargetco
 
 CL_flat.cns $(tr_segs_flat) $(ex_segs_flat): %.cns: %.cnr
 	cnvkit.py segment --drop-low $< -o $@
+
+CL_flat.bed: CL_flat.cns
+	cnvkit.py export bed $< --ploidy 6 --show ploidy -g f -y -o $@
 
 
 metrics-tr-flat.csv: $(tr_segs_flat)
