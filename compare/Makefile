@@ -14,6 +14,14 @@ cl_num := _seq _acgh
 # Griping
 tr_180k_failed_contra := 06
 
+# CL-specific analysis with BED files
+cl_cns := ../build/CL_acgh.cns ../build/CL_seq.cns \
+	cnvkit-pair/CL_pair.cns cnvkit-flat/CL_flat.cns \
+	copywriter/CL.cw-pair.cns copywriter/CL.cw-noref.cns \
+	contra-pool/CL.contra-pool.cns contra-pair/CL.contra-pair.cns
+cl_bed := $(cl_cns:.cns=.bed)
+
+
 all: tr ex comparison.pdf
 
 .PHONY: tr
@@ -25,6 +33,9 @@ tr: tr-cnvkit-pool.diffs.dat tr-cnvkit-pair.diffs.dat tr-cnvkit-flat.diffs.dat \
 ex: ex-cnvkit-pool.diffs.dat ex-cnvkit-pair.diffs.dat ex-cnvkit-flat.diffs.dat \
 	ex-contra-pool.diffs.dat ex-contra-pair.diffs.dat \
 	ex-copywriter-pair.diffs.dat ex-copywriter-noref.diffs.dat
+
+.PHONY: cl
+cl: $(cl_bed)
 
 .PHONY: clean
 clean:
@@ -42,6 +53,12 @@ comparison.pdf: compare_methods.py \
 	cl-copywriter-pair.diffs.dat cl-copywriter-noref.diffs.dat \
 	cl-contra-pool.diffs.dat cl-contra-pair.diffs.dat
 	python $^ -o $@ > comparison.stats.csv
+
+
+# CL analysis with BED files
+
+$(cl_bed): $(cl_cns)
+	cnvkit.py export bed $< --ploidy 6 --show ploidy -g f -y -o $@
 
 
 # CNVkit, pooled normal reference

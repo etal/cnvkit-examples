@@ -58,10 +58,8 @@ def segment_cn(segset):
     elif len(segset) == 1:
         return segset.log2[0]
     else:
-        # Weight by segment sizes
-        return np.average(segset.log2, weights=(segset.end - segset.start))
         # Median
-        # return segset.log2.median()
+        return segset.log2.median()
 
 
 # ENH - port to GA/CNA.by_genes, .squash_genes

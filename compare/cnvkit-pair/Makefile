@@ -33,7 +33,7 @@ tr: heatmap-tr-paired.pdf
 ex: $(ex_segs) heatmap-ex-paired.pdf
 
 .PHONY: cl
-cl: $(cl_segs) $(cl_segs:.cns=.bed)
+cl: $(cl_segs)
 
 .PHONY: metrics
 metrics:  metrics-tr-paired.csv metrics-ex-paired.csv metrics-cl-paired.csv
@@ -74,9 +74,6 @@ $(cl_cnrs): ../../cell/CL_seq.targetcoverage.cnn ../../cell/CL_seq.antitargetcov
 
 $(cl_segs) $(tr_segs) $(ex_segs): %.cns: %.cnr
 	cnvkit.py segment --drop-low $< -o $@
-
-$(cl_segs:.cns=.bed): %.bed: %.cns
-	cnvkit.py export bed $< --ploidy 6 --show ploidy -g f -y -o $@
 
 
 metrics-tr-paired.csv: $(tr_segs)

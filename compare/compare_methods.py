@@ -176,7 +176,7 @@ def test_data():
 if __name__ == '__main__':
     args = get_argparser().parse_args()
     stats = label_plot(make_plot(load_inputs(args)))
-    stats.to_csv(sys.stdout, sep='\t', float_format="%.5g", index=False)
+    stats.to_csv(sys.stdout, sep='\t', float_format="%.5f", index=False)
 
     if args.output:
         plt.savefig(args.output, format='pdf', bbox_inches="tight")

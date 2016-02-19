@@ -39,11 +39,11 @@ ex_segs := $(ex_cnrs:.cnr=.cns)
 # ------------------------------------------------------------------------------
 #  Action!
 
-all: cl tr ex cl_compare.pdf
+all: cl tr ex
 
 
 .PHONY: cl
-cl: heatmap-cl.pdf $(cl_segs:.cns=.bed) cl_compare.pdf
+cl: heatmap-cl.pdf cl_compare.pdf
 
 .PHONY: tr
 tr: heatmap-tr.pdf TR_95_T-diagram.pdf TR_95_T-scatter.pdf TR_95_T-CDK4-MDM2-scatter.pdf
@@ -104,8 +104,12 @@ $(tr_cnrs): build/%.cnr: targeted/%.targetcoverage.cnn targeted/%.antitargetcove
 $(ex_cnrs): build/%.cnr: exome/%.targetcoverage.cnn exome/%.antitargetcoverage.cnn reference-exome.cnn
 	cnvkit.py fix $^ -o $@
 
-$(cl_segs) $(tr_thin_segs) $(tr_segs) $(ex_segs): %.cns: %.cnr
+build/CL_seq.cns $(tr_thin_segs) $(tr_segs) $(ex_segs): %.cns: %.cnr
 	cnvkit.py segment --drop-low $< -o $@
+
+# Segment aCGH without filtering
+build/CL_acgh.cns: build/CL_acgh.cnr
+	cnvkit.py segment --drop-outliers 0 $< -o $@
 
 
 # == Results
@@ -139,6 +143,7 @@ ex-metrics.csv: $(ex_segs)
 	cnvkit.py metrics $(ex_cnrs) -s $^ -o $@
 
 # Example figures
+
 TR_95_T-diagram.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 	cnvkit.py diagram -s $^ -y -o $@
 
@@ -149,17 +154,8 @@ TR_95_T-CDK4-MDM2-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 	cnvkit.py scatter -s $^ -o $@ -c chr12:50000000-80000000 -g CDK4,MDM2
 
 
-# Cell line benchmark
-
-int_cl := intervals/cell-baits.bed
-cl_compare=build/CL_seq.cnvkit.csv
-
-$(cl_compare): build/%.cnvkit.csv: compare/pair_segments.py build/CL_acgh.cns build/%.cns
-	python $^ -i $(int_cl) -o $@
+# Benchmark stats for cell line only (for quick evaluation)
 
 cl_compare.pdf: compare_cell.py compare/cl-cnvkit-pool.diffs.dat compare/cl-cnvkit-pair.diffs.dat compare/cl-cnvkit-flat.diffs.dat
 	python $^ -o $@ > cl_compare.stats.csv
-
-$(cl_segs:.cns=.bed): %.bed: %.cns
-	cnvkit.py export bed $< --ploidy 6 --show ploidy -g f -y -o $@
 
