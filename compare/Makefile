@@ -14,13 +14,6 @@ cl_num := _seq _acgh
 # Griping
 tr_180k_failed_contra := 06
 
-# CL-specific analysis with BED files
-cl_cns := ../build/CL_acgh.cns ../build/CL_seq.cns \
-	cnvkit-pair/CL_pair.cns cnvkit-flat/CL_flat.cns \
-	copywriter/CL.cw-pair.cns copywriter/CL.cw-noref.cns \
-	contra-pool/CL.contra-pool.cns contra-pair/CL.contra-pair.cns
-cl_bed := $(cl_cns:.cns=.bed)
-
 
 all: tr ex comparison.pdf
 
@@ -35,7 +28,7 @@ ex: ex-cnvkit-pool.diffs.dat ex-cnvkit-pair.diffs.dat ex-cnvkit-flat.diffs.dat \
 	ex-copywriter-pair.diffs.dat ex-copywriter-noref.diffs.dat
 
 .PHONY: cl
-cl: $(cl_bed)
+cl: cl-wao.zip
 
 .PHONY: clean
 clean:
@@ -55,10 +48,23 @@ comparison.pdf: compare_methods.py \
 	python $^ -o $@ > comparison.stats.csv
 
 
-# CL analysis with BED files
+# CL-specific analysis with BED files
 
-$(cl_bed): $(cl_cns)
+cl_cns := ../build/CL_seq.cns \
+	cnvkit-pair/CL_pair.cns cnvkit-flat/CL_flat.cns \
+	copywriter/CL.cw-pair.cns copywriter/CL.cw-noref.cns \
+	contra-pool/CL.contra-pool.cns contra-pair/CL.contra-pair.cns
+cl_bed := $(cl_cns:.cns=.bed)
+cl_wao := $(cl_cns:.cns=.wao.bed)
+
+$(cl_bed) ../build/CL_acgh.bed: %.bed: %.cns
 	cnvkit.py export bed $< --ploidy 6 --show ploidy -g f -y -o $@
+
+$(cl_wao): %.wao.bed: %.bed ../build/CL_acgh.bed
+	bedtools intersect -wao -a $(lastword $^) -b $< > $@
+
+cl-wao.zip: $(cl_wao)
+	zip --junk-paths $@ $^
 
 
 # CNVkit, pooled normal reference
