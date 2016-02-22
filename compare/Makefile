@@ -28,7 +28,7 @@ ex: ex-cnvkit-pool.diffs.dat ex-cnvkit-pair.diffs.dat ex-cnvkit-flat.diffs.dat \
 	ex-copywriter-pair.diffs.dat ex-copywriter-noref.diffs.dat
 
 .PHONY: cl
-cl: cl-wao.zip
+cl: cl-bedcompare.zip
 
 .PHONY: clean
 clean:
@@ -56,6 +56,7 @@ cl_cns := ../build/CL_seq.cns \
 	contra-pool/CL.contra-pool.cns contra-pair/CL.contra-pair.cns
 cl_bed := $(cl_cns:.cns=.bed)
 cl_wao := $(cl_cns:.cns=.wao.bed)
+cl_wbo := $(cl_cns:.cns=.wbo.bed)
 
 $(cl_bed) ../build/CL_acgh.bed: %.bed: %.cns
 	cnvkit.py export bed $< --ploidy 6 --show ploidy -g f -y -o $@
@@ -63,7 +64,10 @@ $(cl_bed) ../build/CL_acgh.bed: %.bed: %.cns
 $(cl_wao): %.wao.bed: %.bed ../build/CL_acgh.bed
 	bedtools intersect -wao -a $(lastword $^) -b $< > $@
 
-cl-wao.zip: $(cl_wao)
+$(cl_wbo): %.wbo.bed: %.bed ../build/CL_acgh.bed
+	bedtools intersect -wao -a $< -b $(lastword $^) > $@
+
+cl-bedcompare.zip: $(cl_wao) $(cl_wbo)
 	zip --junk-paths $@ $^
 
 
