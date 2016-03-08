@@ -147,6 +147,47 @@ $(cl_ckflat): pair_segments.py $(cnvbuild)/CL_acgh.cns cnvkit-flat/CL_flat.cns
 	python $^ -i $(int_cl) -o $@
 
 
+# Quicker-running benchmark
+# CNVkit pool/pair/flat x 6 samples
+
+# CL_seq TR_55_T TR_77_T TR_95_T EX_19_T EX_35_T
+tr_mini = 55 77 95
+tr_mini_pool := $(patsubst %,tables/TR_%_T.cnvkit-pool.csv,$(tr_mini))
+tr_mini_pair := $(patsubst %,tables/TR_%_T.cnvkit-pair.csv,$(tr_mini))
+tr_mini_flat := $(patsubst %,tables/TR_%_T.cnvkit-flat.csv,$(tr_mini))
+
+ex_mini := 19 35
+ex_mini_pool := $(patsubst %,tables/EX_%_T.cnvkit-pool.csv,$(ex_mini))
+ex_mini_pair := $(patsubst %,tables/EX_%_T.cnvkit-pair.csv,$(ex_mini))
+ex_mini_flat := $(patsubst %,tables/EX_%_T.cnvkit-flat.csv,$(ex_mini))
+
+
+tr-mini-pool.diffs.dat: alt.py $(tr_mini_pool)
+	python $^ -n tr-mini-pool
+
+ex-mini-pool.diffs.dat: alt.py $(ex_mini_pool)
+	python $^ -n ex-mini-pool
+
+tr-mini-pair.diffs.dat: alt.py $(tr_mini_pair)
+	python $^ -n tr-mini-pair
+
+ex-mini-pair.diffs.dat: alt.py $(ex_mini_pair)
+	python $^ -n ex-mini-pair
+
+tr-mini-flat.diffs.dat: alt.py $(tr_mini_flat)
+	python $^ -n tr-mini-flat
+
+ex-mini-flat.diffs.dat: alt.py $(ex_mini_flat)
+	python $^ -n ex-mini-flat
+
+
+mini-comparison.pdf: compare_mini.py \
+	tr-mini-pool.diffs.dat tr-mini-pair.diffs.dat tr-mini-flat.diffs.dat \
+	ex-mini-pool.diffs.dat ex-mini-pair.diffs.dat ex-mini-flat.diffs.dat \
+	cl-cnvkit-pool.diffs.dat cl-cnvkit-pair.diffs.dat cl-cnvkit-flat.diffs.dat
+	python $^ -o $@ > mini-comparison.stats.csv
+
+
 # CONTRA, pooled normal references
 
 tr_conpool=$(patsubst %,tables/TR_%_T.contra-pool.csv,$(tr_num))

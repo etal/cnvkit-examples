@@ -43,7 +43,7 @@ all: cl tr ex
 
 
 .PHONY: cl
-cl: heatmap-cl.pdf cl_compare.pdf
+cl: heatmap-cl.pdf
 
 .PHONY: tr
 tr: heatmap-tr.pdf TR_95_T-diagram.pdf TR_95_T-scatter.pdf TR_95_T-CDK4-MDM2-scatter.pdf
@@ -152,10 +152,3 @@ TR_95_T-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 
 TR_95_T-CDK4-MDM2-scatter.pdf: build/TR_95_T.cns build/TR_95_T.cnr
 	cnvkit.py scatter -s $^ -o $@ -c chr12:50000000-80000000 -g CDK4,MDM2
-
-
-# Benchmark stats for cell line only (for quick evaluation)
-
-cl_compare.pdf: compare_cell.py compare/cl-cnvkit-pool.diffs.dat compare/cl-cnvkit-pair.diffs.dat compare/cl-cnvkit-flat.diffs.dat
-	python $^ -o $@ > cl_compare.stats.csv
-
