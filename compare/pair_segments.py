@@ -19,8 +19,7 @@ def read_paired_genes(cbs1, cbs2, interval):
 
     Get overlapping regions of two paired segment/gene sets.
 
-    For genes with 2 or more segments, take the longest segment (or [weighted]
-    average).
+    For genes with 2 or more segments, take the median value of the segments.
 
     Return a pandas.DataFrame with columns:
         chrom, start, end, label, value1, value2
