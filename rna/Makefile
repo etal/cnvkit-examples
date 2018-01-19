@@ -33,11 +33,13 @@ all_labels_seg := arm cbs cbsgt20 flasso haar hmm hmmgt20
 resid_labels := tsmooth100 wsmooth200 arm cbs flasso haar hmm
 # bias_labels := plain nogc notx nogctx
 bias_labels := plain wsmooth200
+heat_labels := arm cbs flasso haar hmm
 
-plots_2d := $(patsubst %,plots/rna-vs-acgh-%.pdf,$(call_labels))
+plots_2d := $(patsubst %,plots/rna-vs-acgh-%.pdf,$(resid_labels))
 plot_resid := plots/residuals-vs-acgh.pdf
 plot_bias := plots/bias-vs-acgh.pdf
-heatmaps := heatmap_tcga.pdf heatmap_tcga_haar.pdf
+heatmaps :=  $(patsubst %,plots/heatmap-%.pdf,$(heat_labels))
+
 
 # Ensure these intermediate files that aren't targets are built first
 thunk := build/tcga_combined_log2ratios.tsv build/tcga-acgh-seg-genes.tsv \
@@ -165,9 +167,20 @@ $(plot_bias): \
 	$(patsubst %,build/tcga-rna-%-genes.tsv,$(bias_labels))
 	python $^ -o $@
 
-heatmap_tcga.pdf: $(cbs_cns)
+# $(heatmaps): plots/heatmap-%.pdf: $(foreach $(heat_labels,%/...)
+#         cnvkit.py heatmap -d --no-shift-xy $^ -o $@
+plots/heatmap-arm.pdf: $(arm_cns)
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
-heatmap_tcga_haar.pdf: $(haar_cns)
+plots/heatmap-cbs.pdf: $(cbs_cns)
+	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
+
+plots/heatmap-flasso.pdf: $(flasso)
+	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
+
+plots/heatmap-haar.pdf: $(haar)
+	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
+
+plots/heatmap-hmm.pdf: $(hmm_cns)
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
