@@ -30,14 +30,14 @@ nogctx_cnr :=
 # Plots
 all_labels_bin := plain tsmooth100 wsmooth200 wsmooth400
 all_labels_seg := arm cbs cbsgt20 flasso haar hmm hmmgt20
-resid_labels := tsmooth100 wsmooth200 arm cbs flasso haar hmm
+resid_labels := tsmooth100 wsmooth200 arm cbs flasso haar
 # bias_labels := plain nogc notx nogctx
 bias_labels := plain wsmooth200
-heat_labels := arm cbs flasso haar hmm
+heat_labels := arm cbs flasso haar
 
 plots_2d := $(patsubst %,plots/rna-vs-acgh-%.pdf,$(resid_labels))
-plot_resid := plots/residuals-vs-acgh.pdf
-plot_bias := plots/bias-vs-acgh.pdf
+plot_resid := plots/residuals-vs-acgh.png
+plot_bias := plots/bias-vs-acgh.png
 heatmaps :=  $(patsubst %,plots/heatmap-%.pdf,$(heat_labels))
 
 
@@ -82,15 +82,15 @@ $(firstword $(acgh_cns)): tcga2cns.py $(tcga_acgh_seg)
 # $(asmooth50_cnr): adaptive_smooth.py $(plain_cnr)
 #         python $^ -w 50 -d asmooth50
 
-$(tsmooth100_cnr): smooth_tirosh.py $(plain_cnr)
+$(firstword $(tsmooth100_cnr)): smooth_tirosh.py $(plain_cnr)
 	mkdir -p tsmooth100
 	python $^ -w 100 -d tsmooth100
 
-$(wsmooth200_cnr): smooth_cnr.py $(plain_cnr)
+$(firstword $(wsmooth200_cnr)): smooth_cnr.py $(plain_cnr)
 	mkdir -p wsmooth200
 	python $^ -w 200 -d wsmooth200
 
-$(wsmooth400_cnr): smooth_cnr.py $(plain_cnr)
+$(firstword $(wsmooth400_cnr)): smooth_cnr.py $(plain_cnr)
 	mkdir -p wsmooth400
 	python $^ -w 400 -d wsmooth400
 
@@ -98,15 +98,19 @@ $(arm_cns): arm/%.cns: out/%.cnr
 	cnvkit.py segment -m none $< -o $@
 
 $(cbs_cns): cbs/%.cns: out/%.cnr
+	mkdir -p cbs
 	cnvkit.py segment -m cbs -p 2 $< -o $@
 
 $(hmm_cns): hmm/%.cns: out/%.cnr
+	mkdir -p hmm
 	cnvkit.py segment -m hmm $< -o $@
 
 $(haar_cns): haar/%.cns: out/%.cnr
+	mkdir -p haar
 	cnvkit.py segment -m haar $< -o $@
 
 $(flasso_cns): flasso/%.cns: out/%.cnr
+	mkdir -p flasso
 	cnvkit.py segment -m flasso $< -o $@
 
 
@@ -139,6 +143,9 @@ build/tcga-rna-cbs-genes.tsv: collate_by_gene.py $(cbs_cns)
 
 build/tcga-rna-cbsgt20-genes.tsv: collate_by_gene.py $(cbs_cns)
 	python $^ -s -w 20 -o $@
+
+build/tcga-rna-haar-genes.tsv: collate_by_gene.py $(haar_cns)
+	python $^ -s -o $@
 
 build/tcga-rna-hmm-genes.tsv: collate_by_gene.py $(hmm_cns)
 	python $^ -s -o $@
