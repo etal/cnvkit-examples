@@ -172,17 +172,22 @@ $(plot_bias): \
 # $(heatmaps): plots/heatmap-%.pdf: $(foreach $(heat_labels,%/...)
 #         cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 plots/heatmap-arm.pdf: $(arm_cns)
+	mkdir -p plots
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
 plots/heatmap-cbs.pdf: $(cbs_cns)
+	mkdir -p plots
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
 plots/heatmap-flasso.pdf: $(flasso_cns)
+	mkdir -p plots
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
 plots/heatmap-haar.pdf: $(haar_cns)
+	mkdir -p plots
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
 plots/heatmap-hmm.pdf: $(hmm_cns)
+	mkdir -p plots
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
