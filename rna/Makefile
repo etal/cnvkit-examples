@@ -41,16 +41,17 @@ plot_bias := plots/bias-vs-acgh.pdf
 heatmaps :=  $(patsubst %,plots/heatmap-%.pdf,$(heat_labels))
 
 
-# Ensure these intermediate files that aren't targets are built first
-thunk := build/tcga_combined_log2ratios.tsv build/tcga-acgh-seg-genes.tsv \
-	$(acgh_cns)
+all: build/_thunk $(heatmaps) $(plots_2d) $(plot_resid) $(plot_bias)
 
-all: $(thunk) \
-	$(arm_cns) $(haar_cns) $(hmm_cns) $(flasso_cns) \
-	$(plots_2d) $(plot_resid) $(plot_bias) $(heatmaps)
-
+.PSEUDO: clean
 clean:
 	rm -vf build/*
+
+
+# Generate intermediate intermediate files that aren't explicit targets
+build/_thunk: build/tcga_combined_log2ratios.tsv \
+	$(firstword $(acgh_cns)) build/tcga-acgh-seg-genes.tsv
+	touch $@
 
 
 # Convert TCGA raw data to CNVkit formats ===
@@ -64,13 +65,14 @@ $(corr_out): $(correlate) resource/TCGA_SKCM_CNA.tsv resource/TCGA_SKCM_RNA_Seq_
 
 gene_info := ~/code/cnvkit/data/ensembl-gene-info.hg38.tsv
 
+# Makes all $(plain_cnr) as out/*.cnr
 build/tcga_combined_log2ratios.tsv: $(corr_out) $(gene_info)
 	mkdir -p build/
 	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
 		-o $@ --output-dir out/ $(tcga_rna_counts)
 
-
-$(acgh_cns): acgh/%.acgh.cns: tcga2cns.py tcga-acgh-seg/%.txt
+# Makes all $(acgh_cns) as acgh/*.acgh.cns
+$(firstword $(acgh_cns)): tcga2cns.py $(tcga_acgh_seg)
 	mkdir -p acgh/
 	python $^ -d acgh/ -g $(gene_info)
 
@@ -96,7 +98,7 @@ $(arm_cns): arm/%.cns: out/%.cnr
 	cnvkit.py segment -m none $< -o $@
 
 $(cbs_cns): cbs/%.cns: out/%.cnr
-	cnvkit.py segment -m cbs $< -o $@
+	cnvkit.py segment -m cbs -p 2 $< -o $@
 
 $(hmm_cns): hmm/%.cns: out/%.cnr
 	cnvkit.py segment -m hmm $< -o $@
@@ -175,10 +177,10 @@ plots/heatmap-arm.pdf: $(arm_cns)
 plots/heatmap-cbs.pdf: $(cbs_cns)
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
-plots/heatmap-flasso.pdf: $(flasso)
+plots/heatmap-flasso.pdf: $(flasso_cns)
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
-plots/heatmap-haar.pdf: $(haar)
+plots/heatmap-haar.pdf: $(haar_cns)
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
 plots/heatmap-hmm.pdf: $(hmm_cns)
