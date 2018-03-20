@@ -57,20 +57,23 @@ def load_cnx(fname, gene_info, min_weight=0, is_segment=False):
 
     chunks = []
     for _chrom, info_rows, cnx_rows in by_shared_chroms(gene_info, d, False):
-        info_midpoints = info_rows['midpoint']
+        info_midpoints = info_rows['midpoint'].values
+        info_genes = info_rows['gene'].values
         # Locate which segments/bins each gene midpoint falls within
         # - Compare both start and end to ensure (start <= midpoint < end)
         # - If not, then skip that gene
-        starts_idx = cnx_rows['start'].searchsorted(info_midpoints, 'right')
-        ends_idx = cnx_rows['end'].searchsorted(info_midpoints, 'right')
-        ok_genes_idx = (starts_idx == ends_idx + 1)
-        genes_in_cnx_idx = starts_idx.take(ok_genes_idx.nonzero()[0])
-        gene_log2 = cnx_rows['log2'][genes_in_cnx_idx]
-        gene_sizes = (cnx_rows['end'] - cnx_rows['start'])[genes_in_cnx_idx]
+        cnx_starts = cnx_rows['start'].values
+        starts_idx = cnx_starts.searchsorted(info_midpoints, 'right')
+        cnx_ends = cnx_rows['end'].values
+        ends_idx = cnx_ends.searchsorted(info_midpoints, 'right')
+        ok_genes_mask = (starts_idx == ends_idx + 1)
+        genes_in_cnx_idx = starts_idx.take(ok_genes_mask.nonzero()[0]) - 1
+        gene_log2 = cnx_rows['log2'].values[genes_in_cnx_idx]
+        gene_sizes = (cnx_ends - cnx_starts)[genes_in_cnx_idx]
         # Stash 'em, including gene name
-        chunk_df = pd.DataFrame({'gene': info_rows.loc[ok_genes_idx, 'gene'].values,
-                                 'log2': gene_log2.values,
-                                 'size': gene_sizes.values})
+        chunk_df = pd.DataFrame({'gene': info_genes[ok_genes_mask],
+                                 'log2': gene_log2,
+                                 'size': gene_sizes})
         chunks.append(chunk_df)
 
     df = pd.concat(chunks)
