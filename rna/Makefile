@@ -118,43 +118,43 @@ $(flasso_cns): flasso/%.cns: out/%.cnr
 
 build/tcga-acgh-seg-genes.tsv: collate_by_gene.py $(acgh_cns)
 	mkdir -p build/
-	python $^ -s -o $@
+	python $^ -s -g $(gene_info) -o $@
 
 build/tcga-rna-plain-genes.tsv: collate_by_gene.py $(plain_cnr)
-	python $^ -o $@
+	python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-wsmooth200-genes.tsv: collate_by_gene.py $(wsmooth200_cnr)
-	python $^ -o $@
+	python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-wsmooth400-genes.tsv: collate_by_gene.py $(wsmooth400_cnr)
-	python $^ -o $@
+	python $^ -g $(gene_info) -o $@
 
 # tcga-rna-asmooth50-genes.tsv: collate_by_gene.py $(asmooth50_cnr)
-#         python $^ -o $@
+#         python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-tsmooth100-genes.tsv: collate_by_gene.py $(tsmooth100_cnr)
-	python $^ -o $@
+	python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-arm-genes.tsv: collate_by_gene.py $(arm_cns)
-	python $^ -s -o $@
+	python $^ -s -g $(gene_info) -o $@
 
 build/tcga-rna-cbs-genes.tsv: collate_by_gene.py $(cbs_cns)
-	python $^ -s -o $@
+	python $^ -s -g $(gene_info) -o $@
 
 build/tcga-rna-cbsgt20-genes.tsv: collate_by_gene.py $(cbs_cns)
-	python $^ -s -w 20 -o $@
+	python $^ -s -w 20 -g $(gene_info) -o $@
 
 build/tcga-rna-haar-genes.tsv: collate_by_gene.py $(haar_cns)
-	python $^ -s -o $@
+	python $^ -s -g $(gene_info) -o $@
 
 build/tcga-rna-hmm-genes.tsv: collate_by_gene.py $(hmm_cns)
-	python $^ -s -o $@
+	python $^ -s -g $(gene_info) -o $@
 
 build/tcga-rna-hmmgt20-genes.tsv: collate_by_gene.py $(hmm_cns)
-	python $^ -s -w 20 -o $@
+	python $^ -s -w 20 -g $(gene_info) -o $@
 
 build/tcga-rna-flasso-genes.tsv: collate_by_gene.py $(flasso_cns)
-	python $^ -s -o $@
+	python $^ -s -g $(gene_info) -o $@
 
 
 # Plots ===
