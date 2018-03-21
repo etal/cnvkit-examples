@@ -83,10 +83,8 @@ def load_cnx(fname, gene_info, min_weight=0, is_segment=False):
         print("Found", dup_idx.sum(), "duplicated gene names in",
               fname, file=sys.stderr)
         df = df[~dup_idx]
-    # TODO choose log2 vs. weight column here?
-    df = df.set_index('gene')
-    ser = df['log2'].sort_index().rename(basename(fname))
-    return ser
+    df = df.set_index('gene').sort_index()
+    return basename(fname), df
 
 
 def load_gene_midpoints(gene_resource):
@@ -108,23 +106,28 @@ if __name__ == '__main__':
     AP.add_argument('-g', '--gene-resource', metavar="FILE", required=True,
                     # default="data/ensembl-gene-info.hg38.tsv",
                     help="Ensembl BioMart-derived gene info table.")
-    AP.add_argument('-s', '--segmented', action='store_true',
-                    help="Input files are .cns, multiple genes per row.")
     AP.add_argument('-w', '--min-weight', type=int, default=0,
                     help="Minimum segment or bin weight to keep.")
     AP.add_argument('-o', '--output',
                     help="Output filename (*.tsv)")
+    AP.add_argument('-s', '--sizes',
+                    help="Output filename for containin-segment sizes (*.tsv).")
     args = AP.parse_args()
 
     gene_info = load_gene_midpoints(args.gene_resource)
 
-    print("Expecting", ".cns" if args.segmented else ".cnr", "files",
-          file=sys.stderr)
-    sample_cols = [load_cnx(fname, gene_info, args.min_weight, args.segmented)
-                   for fname in args.fnames]
-    print("Loaded", len(sample_cols), "samples", file=sys.stderr)
+    bnames, dframes = zip(*[load_cnx(fname, gene_info, args.min_weight)
+                            for fname in args.fnames])
+    print("Loaded", len(bnames), "samples", file=sys.stderr)
 
-    # TODO write either log2 values or containing-segment sizes
-    data = pd.concat(sample_cols, axis=1)
-    data.to_csv(args.output, sep='\t', index=True)
-    print("Wrote", args.output, "with", len(data), "rows")
+    # Write log2 values and containing-segment sizes to separate files
+    all_log2 = pd.concat([df['log2'] for df in dframes], axis=1)
+    all_log2.columns = bnames
+    all_log2.to_csv(args.output, sep='\t', index=True)
+    print("Wrote", args.output, "with", len(all_log2), "rows")
+
+    if args.sizes:
+        all_sizes = pd.concat([df['size'] for df in dframes], axis=1)
+        all_sizes.columns = bnames
+        all_sizes.to_csv(args.sizes, sep='\t', index=True)
+        print("Wrote", args.sizes, "with", len(all_sizes), "rows")

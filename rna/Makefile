@@ -150,7 +150,7 @@ $(hmm_cns): hmm/%.cns: out/%.cnr
 
 build/tcga-acgh-seg-genes.tsv: collate_by_gene.py $(acgh_cns)
 	mkdir -p build/
-	python $^ -s -g $(gene_info) -o $@
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv}
 
 build/tcga-rna-plain-genes.tsv: collate_by_gene.py $(plain_cnr)
 	python $^ -g $(gene_info) -o $@
@@ -183,25 +183,25 @@ build/tcga-rna-tsmooth200-genes.tsv: collate_by_gene.py $(tsmooth200_cnr)
 	python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-arm-genes.tsv: collate_by_gene.py $(arm_cns)
-	python $^ -s -g $(gene_info) -o $@
-
-build/tcga-rna-cbs-genes.tsv: collate_by_gene.py $(cbs_cns)
-	python $^ -s -g $(gene_info) -o $@
-
-build/tcga-rna-cbsgt20-genes.tsv: collate_by_gene.py $(cbs_cns)
-	python $^ -s -w 20 -g $(gene_info) -o $@
-
-build/tcga-rna-haar-genes.tsv: collate_by_gene.py $(haar_cns)
-	python $^ -s -g $(gene_info) -o $@
-
-build/tcga-rna-hmm-genes.tsv: collate_by_gene.py $(hmm_cns)
-	python $^ -s -g $(gene_info) -o $@
-
-build/tcga-rna-hmmgt20-genes.tsv: collate_by_gene.py $(hmm_cns)
-	python $^ -s -w 20 -g $(gene_info) -o $@
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv}
 
 build/tcga-rna-flasso-genes.tsv: collate_by_gene.py $(flasso_cns)
-	python $^ -s -g $(gene_info) -o $@
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv}
+
+build/tcga-rna-cbs-genes.tsv: collate_by_gene.py $(cbs_cns)
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv}
+
+build/tcga-rna-cbsgt20-genes.tsv: collate_by_gene.py $(cbs_cns)
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv} -w 20
+
+build/tcga-rna-haar-genes.tsv: collate_by_gene.py $(haar_cns)
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv}
+
+build/tcga-rna-hmm-genes.tsv: collate_by_gene.py $(hmm_cns)
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv}
+
+build/tcga-rna-hmmgt20-genes.tsv: collate_by_gene.py $(hmm_cns)
+	python $^ -g $(gene_info) -o $@ -s ${@:.tsv=.size.tsv} -w 20
 
 
 # Plots ===
