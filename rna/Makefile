@@ -10,6 +10,8 @@ plain_cnr := $(patsubst tcga-rna-counts/%.txt,out/%.cnr,$(tcga_rna_counts))
 
 # Smoothings
 tsmooth100_cnr := $(patsubst out/%.cnr,tsmooth100/%.tsmooth100.cnr,$(plain_cnr))
+tsmooth200_cnr := $(patsubst out/%.cnr,tsmooth200/%.tsmooth200.cnr,$(plain_cnr))
+wsmooth100_cnr := $(patsubst out/%.cnr,wsmooth100/%.wsmooth100.cnr,$(plain_cnr))
 wsmooth200_cnr := $(patsubst out/%.cnr,wsmooth200/%.wsmooth200.cnr,$(plain_cnr))
 wsmooth400_cnr := $(patsubst out/%.cnr,wsmooth400/%.wsmooth400.cnr,$(plain_cnr))
 # asmooth50_cnr := asmooth50/%
@@ -22,18 +24,17 @@ haar_cns := $(patsubst out/%.cnr,haar/%.cns,$(plain_cnr))
 hmm_cns := $(patsubst out/%.cnr,hmm/%.cns,$(plain_cnr))
 
 # Bias corrections
-# TODO create .cnr files without GC and/or tx_length corrections
-nogc_cnr :=
-notx_cnr :=
-nogctx_cnr :=
+nogc_cnr := $(patsubst tcga-rna-counts/%.txt,nogc/%.cnr,$(tcga_rna_counts))
+notx_cnr := $(patsubst tcga-rna-counts/%.txt,notx/%.cnr,$(tcga_rna_counts))
+nogctx_cnr := $(patsubst tcga-rna-counts/%.txt,nogctx/%.cnr,$(tcga_rna_counts))
 
 # Plots
-all_labels_bin := plain tsmooth100 wsmooth200 wsmooth400
+all_labels_bin := plain tsmooth100 tsmooth200 wsmooth100 wsmooth200 wsmooth400
 all_labels_seg := arm cbs cbsgt20 flasso haar hmm hmmgt20
-resid_labels := tsmooth100 wsmooth200 arm cbs flasso haar
+resid_labels := tsmooth100 wsmooth100 tsmooth200 wsmooth200 arm flasso cbs cbsgt20 hmm
 # bias_labels := plain nogc notx nogctx
-bias_labels := plain wsmooth200
-heat_labels := arm cbs flasso haar
+bias_labels := nogctx nogc notx plain wsmooth200
+heat_labels := arm cbs flasso
 
 plots_2d := $(patsubst %,plots/rna-vs-acgh-%.pdf,$(resid_labels))
 plot_resid := plots/residuals-vs-acgh.png
@@ -50,6 +51,9 @@ clean:
 
 # Generate intermediate intermediate files that aren't explicit targets
 build/_thunk: build/tcga_combined_log2ratios.tsv \
+	build/tcga_combined_log2ratios_nogc.tsv \
+	build/tcga_combined_log2ratios_notx.tsv \
+	build/tcga_combined_log2ratios_nogctx.tsv \
 	$(firstword $(acgh_cns)) build/tcga-acgh-seg-genes.tsv
 	touch $@
 
@@ -65,16 +69,36 @@ $(corr_out): $(correlate) resource/TCGA_SKCM_CNA.tsv resource/TCGA_SKCM_RNA_Seq_
 
 gene_info := ~/code/cnvkit/data/ensembl-gene-info.hg38.tsv
 
+# Makes all $(acgh_cns) as acgh/*.acgh.cns
+$(firstword $(acgh_cns)): tcga2cns.py $(tcga_acgh_seg)
+	mkdir -p acgh/
+	python $^ -d acgh/ -g $(gene_info)
+
 # Makes all $(plain_cnr) as out/*.cnr
 build/tcga_combined_log2ratios.tsv: $(corr_out) $(gene_info)
 	mkdir -p build/
 	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
 		-o $@ --output-dir out/ $(tcga_rna_counts)
 
-# Makes all $(acgh_cns) as acgh/*.acgh.cns
-$(firstword $(acgh_cns)): tcga2cns.py $(tcga_acgh_seg)
-	mkdir -p acgh/
-	python $^ -d acgh/ -g $(gene_info)
+# Makes nogc_cnr, notx_cnr, nogctx_cnr
+build/tcga_combined_log2ratios_nogc.tsv: $(corr_out) $(gene_info)
+	mkdir -p build/
+	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
+		--no-gc \
+		-o $@ --output-dir nogc/ $(tcga_rna_counts)
+
+build/tcga_combined_log2ratios_notx.tsv: $(corr_out) $(gene_info)
+	mkdir -p build/
+	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
+		--no-tx \
+		-o $@ --output-dir notx/ $(tcga_rna_counts)
+
+build/tcga_combined_log2ratios_nogctx.tsv: $(corr_out) $(gene_info)
+	mkdir -p build/
+	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
+		--no-gc --no-tx \
+		-o $@ --output-dir nogctx/ $(tcga_rna_counts)
+
 
 
 # CNVkit smoothing and segmentation ===
@@ -85,6 +109,14 @@ $(firstword $(acgh_cns)): tcga2cns.py $(tcga_acgh_seg)
 $(firstword $(tsmooth100_cnr)): smooth_tirosh.py $(plain_cnr)
 	mkdir -p tsmooth100
 	python $^ -w 100 -d tsmooth100
+
+$(firstword $(tsmooth200_cnr)): smooth_tirosh.py $(plain_cnr)
+	mkdir -p tsmooth200
+	python $^ -w 200 -d tsmooth200
+
+$(firstword $(wsmooth100_cnr)): smooth_cnr.py $(plain_cnr)
+	mkdir -p wsmooth100
+	python $^ -w 100 -d wsmooth100
 
 $(firstword $(wsmooth200_cnr)): smooth_cnr.py $(plain_cnr)
 	mkdir -p wsmooth200
@@ -99,19 +131,19 @@ $(arm_cns): arm/%.cns: out/%.cnr
 
 $(cbs_cns): cbs/%.cns: out/%.cnr
 	mkdir -p cbs
-	cnvkit.py segment -m cbs -p 2 $< -o $@
+	cnvkit.py segment -m cbs -t .001 -p 2 $< -o $@
 
-$(hmm_cns): hmm/%.cns: out/%.cnr
-	mkdir -p hmm
-	cnvkit.py segment -m hmm $< -o $@
+$(flasso_cns): flasso/%.cns: out/%.cnr
+	mkdir -p flasso
+	cnvkit.py segment -m flasso -t .001 $< -o $@
 
 $(haar_cns): haar/%.cns: out/%.cnr
 	mkdir -p haar
 	cnvkit.py segment -m haar $< -o $@
 
-$(flasso_cns): flasso/%.cns: out/%.cnr
-	mkdir -p flasso
-	cnvkit.py segment -m flasso $< -o $@
+$(hmm_cns): hmm/%.cns: out/%.cnr
+	mkdir -p hmm
+	cnvkit.py segment -m hmm $< -o $@
 
 
 # Intermediate data tables (used for plotting) ===
@@ -121,6 +153,18 @@ build/tcga-acgh-seg-genes.tsv: collate_by_gene.py $(acgh_cns)
 	python $^ -s -g $(gene_info) -o $@
 
 build/tcga-rna-plain-genes.tsv: collate_by_gene.py $(plain_cnr)
+	python $^ -g $(gene_info) -o $@
+
+build/tcga-rna-nogc-genes.tsv: collate_by_gene.py $(nogc_cnr)
+	python $^ -g $(gene_info) -o $@
+
+build/tcga-rna-notx-genes.tsv: collate_by_gene.py $(notx_cnr)
+	python $^ -g $(gene_info) -o $@
+
+build/tcga-rna-nogctx-genes.tsv: collate_by_gene.py $(nogctx_cnr)
+	python $^ -g $(gene_info) -o $@
+
+build/tcga-rna-wsmooth100-genes.tsv: collate_by_gene.py $(wsmooth100_cnr)
 	python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-wsmooth200-genes.tsv: collate_by_gene.py $(wsmooth200_cnr)
@@ -133,6 +177,9 @@ build/tcga-rna-wsmooth400-genes.tsv: collate_by_gene.py $(wsmooth400_cnr)
 #         python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-tsmooth100-genes.tsv: collate_by_gene.py $(tsmooth100_cnr)
+	python $^ -g $(gene_info) -o $@
+
+build/tcga-rna-tsmooth200-genes.tsv: collate_by_gene.py $(tsmooth200_cnr)
 	python $^ -g $(gene_info) -o $@
 
 build/tcga-rna-arm-genes.tsv: collate_by_gene.py $(arm_cns)
