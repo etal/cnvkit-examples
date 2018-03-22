@@ -67,7 +67,7 @@ def extract_residuals(acgh_table, rna_tables, rna_labels):
         # Calculate residuals of RNA gene-ratio estimates from aCGH segments
         resids = acgh_aligned.values.ravel() - rna_aligned.values.ravel()
         # Drop cells where either table is NaN/missing data
-        resids = resids[~np.isnan(resids)].abs()
+        resids = np.abs(resids[~np.isnan(resids)])
         dframe = pd.DataFrame({'residual': resids,
                                'estimator': np.repeat(rna_label, len(resids))})
         dframes.append(dframe)
@@ -78,15 +78,12 @@ def extract_residuals(acgh_table, rna_tables, rna_labels):
 
 def plot_residuals(table, output=None):
     """Violin(?) plot of residuals (y) from TCGA aCGH log2 (x)."""
-    # Fast
     sn.boxplot(x='estimator', y='residual', data=table,
                #  width=.8,
                # See matplotlib.pyplot.boxplot
                #  sym='',  # Hide "fliers", the outlier points
                showfliers=False,
                )
-    # Slow
-    # sn.violinplot(x='estimator', y='residual', data=table)
     plt.xticks(rotation=30)
     if output:
         plt.savefig(output, format='pdf', bbox_inches=0)
