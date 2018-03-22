@@ -31,14 +31,13 @@ nogctx_cnr := $(patsubst tcga-rna-counts/%.txt,nogctx/%.cnr,$(tcga_rna_counts))
 # Plots
 all_labels_bin := plain tsmooth100 tsmooth200 wsmooth100 wsmooth200 wsmooth400
 all_labels_seg := arm cbs cbsgt20 flasso haar hmm hmmgt20
-resid_labels := tsmooth100 wsmooth100 tsmooth200 wsmooth200 arm flasso cbs cbsgt20 hmm
-# bias_labels := plain nogc notx nogctx
+resid_labels := tsmooth100 tsmooth200 wsmooth100 wsmooth200 arm cbs cbsgt20
 bias_labels := nogctx nogc notx plain wsmooth200
 heat_labels := arm cbs flasso
 
 plots_2d := $(patsubst %,plots/rna-vs-acgh-%.pdf,$(resid_labels))
-plot_resid := plots/residuals-vs-acgh.png
-plot_bias := plots/bias-vs-acgh.png
+plot_resid := plots/residuals-vs-acgh.pdf
+plot_bias := plots/bias-vs-acgh.pdf
 heatmaps :=  $(patsubst %,plots/heatmap-%.pdf,$(heat_labels))
 
 
@@ -214,7 +213,7 @@ build/tcga-rna-hmmgt20-genes.tsv: collate_by_gene.py $(hmm_cns)
 
 $(plots_2d): plots/rna-vs-acgh-%.pdf: \
 	plot2d.py build/tcga-rna-%-genes.tsv build/tcga-acgh-seg-genes.tsv
-	python $^ -o $@ -s ${$(nthword 2,$^):.tsv=.size.tsv}
+	python $^ -o $@ -s $(patsubst %.tsv,%.size.tsv,$(lastword $^))
 
 $(plot_resid): \
 	plot_residuals.py build/tcga-acgh-seg-genes.tsv \

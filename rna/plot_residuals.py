@@ -56,6 +56,8 @@ def extract_residuals(acgh_table, rna_tables, rna_labels):
     Sample and gene name indices are lost here, and all sample-gene cells with
     any NA values (in either RNA or aCGH table) are dropped.
     """
+    # TODO - get signal-to-noise ratio (SNR), not residual!
+    #   plot that; it's more informative
     dframes = []
     for rna_table, rna_label in zip(rna_tables, rna_labels):
         print("Processing table", rna_label, "with shape", rna_table.shape)
@@ -65,7 +67,7 @@ def extract_residuals(acgh_table, rna_tables, rna_labels):
         # Calculate residuals of RNA gene-ratio estimates from aCGH segments
         resids = acgh_aligned.values.ravel() - rna_aligned.values.ravel()
         # Drop cells where either table is NaN/missing data
-        resids = resids[~np.isnan(resids)]
+        resids = resids[~np.isnan(resids)].abs()
         dframe = pd.DataFrame({'residual': resids,
                                'estimator': np.repeat(rna_label, len(resids))})
         dframes.append(dframe)
@@ -85,8 +87,9 @@ def plot_residuals(table, output=None):
                )
     # Slow
     # sn.violinplot(x='estimator', y='residual', data=table)
+    plt.xticks(rotation=30)
     if output:
-        plt.savefig(output, format='png', bbox_inches=0)
+        plt.savefig(output, format='pdf', bbox_inches=0)
         print("Wrote", output, file=sys.stderr)
     else:
         plt.show()
@@ -100,5 +103,5 @@ if __name__ == '__main__':
     AP.add_argument('-o', '--output', help="Output filename (PDF)")
     args = AP.parse_args()
 
-    table_resid = load_tables(args.acgh_fname, args.rna_fnames)
-    plot_residuals(table_resid, args.output)
+    table = load_tables(args.acgh_fname, args.rna_fnames)
+    plot_residuals(table, args.output)
