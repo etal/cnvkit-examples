@@ -55,6 +55,20 @@ def load_cnx(fname, gene_info, min_weight=0, is_segment=False):
         d = d[ok_wt]
         print("Dropped", (~ok_wt).sum(), "rows with weight below", min_weight)
 
+    # Drop genes that aren't also listed in the .cnr/.cns file?
+    print("Filtering out bad gene names from gene_info")
+    if 'probes' in d.columns:
+        # It's segments -- multiple genes
+        ok_gene_names = set()
+        for x in d['gene'].str.split(','):
+            ok_gene_names.update(x)
+    else:
+        ok_gene_names = d['gene']
+    mask_to_keep = gene_info['gene'].isin(ok_gene_names)
+    print("Keeping", mask_to_keep.sum(), "/", len(mask_to_keep),
+          "gene names in gene_info")
+    gene_info = gene_info[mask_to_keep]
+
     chunks = []
     for _chrom, info_rows, cnx_rows in by_shared_chroms(gene_info, d, False):
         info_midpoints = info_rows['midpoint'].values

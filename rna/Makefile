@@ -126,22 +126,25 @@ $(firstword $(wsmooth400_cnr)): smooth_cnr.py $(plain_cnr)
 	mkdir -p wsmooth400
 	python $^ -w 400 -d wsmooth400
 
-$(arm_cns): arm/%.cns: out/%.cnr
+$(arm_cns) $(cbs_cns) $(flasso_cns) $(haar_cns) $(hmm_cns): %.cns: %.raw.cns
+	cnvkit.py call -m none --center median $< -o $@
+
+$(arm_cns:.cns=.raw.cns): arm/%.raw.cns: out/%.cnr
 	cnvkit.py segment -m none $< -o $@
 
-$(cbs_cns): cbs/%.cns: out/%.cnr
+$(cbs_cns:.cns=.raw.cns): cbs/%.raw.cns: out/%.cnr
 	mkdir -p cbs
 	cnvkit.py segment -m cbs -t .001 -p 2 $< -o $@
 
-$(flasso_cns): flasso/%.cns: out/%.cnr
+$(flasso_cns:.cns=.raw.cns): flasso/%.raw.cns: out/%.cnr
 	mkdir -p flasso
 	cnvkit.py segment -m flasso -t .001 $< -o $@
 
-$(haar_cns): haar/%.cns: out/%.cnr
+$(haar_cns:.cns=.raw.cns): haar/%.raw.cns: out/%.cnr
 	mkdir -p haar
 	cnvkit.py segment -m haar $< -o $@
 
-$(hmm_cns): hmm/%.cns: out/%.cnr
+$(hmm_cns:.cns=.raw.cns): hmm/%.raw.cns: out/%.cnr
 	mkdir -p hmm
 	cnvkit.py segment -m hmm $< -o $@
 
@@ -211,7 +214,7 @@ build/tcga-rna-hmmgt20-genes.tsv: collate_by_gene.py $(hmm_cns)
 
 $(plots_2d): plots/rna-vs-acgh-%.pdf: \
 	plot2d.py build/tcga-rna-%-genes.tsv build/tcga-acgh-seg-genes.tsv
-	python $^ -o $@
+	python $^ -o $@ -s ${$(nthword 2,$^):.tsv=.size.tsv}
 
 $(plot_resid): \
 	plot_residuals.py build/tcga-acgh-seg-genes.tsv \

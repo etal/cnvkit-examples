@@ -35,6 +35,7 @@ def plot_paired_genes(table, output=None):
     xy_limits = (xymin - pad, xymax + pad)
     nbins = 60
 
+    # TODO facet by segment size <5MB<50MB<
     grid = seaborn.jointplot('aCGH', 'RNA', data=table,
                              kind='hex',
                              space=.03,
@@ -111,6 +112,8 @@ if __name__ == '__main__':
     AP = argparse.ArgumentParser(description=__doc__)
     AP.add_argument('rna', help="CNVkit RNA-based table")
     AP.add_argument('acgh', help="TCGA aCGH-based table")
+    AP.add_argument('-s', '--sizes',
+                    help="aCGH segment sizes for faceting")
     AP.add_argument('-o', '--output',
                     help="Output filename (PDF).")
     args = AP.parse_args()
