@@ -73,7 +73,7 @@ def extract_xys(rna_table, acgh_table, size_table):
     df = pd.DataFrame(allpairs, columns=('RNA', 'aCGH', 'Size'))
     size_labels = np.repeat('5-50MB', len(df))
     size_labels[df['Size'] < 5e6] = '<5MB'
-    size_labels[5e7 < df['Size']] = '>50MB'
+    size_labels[df['Size'] > 5e7] = '>50MB'
     df['Size'] = size_labels
     return df
 
@@ -191,7 +191,6 @@ def plot_paired_genes_facet(table, output=None):
                 linestyle='-', linewidth=1, zorder=-1)
         ax.hexbin(data_subset['aCGH'], data_subset['RNA'],
                   bins='log', gridsize=nbins, mincnt=1,
-             #  edgecolors='red'
                  )
         ax.set_xlabel("aCGH")
     grid.axes.flat[0].set_ylabel("RNA")
@@ -209,10 +208,8 @@ if __name__ == '__main__':
     AP = argparse.ArgumentParser(description=__doc__)
     AP.add_argument('rna', help="CNVkit RNA-based table")
     AP.add_argument('acgh', help="TCGA aCGH-based table")
-    AP.add_argument('-s', '--sizes',
-                    help="aCGH segment sizes for faceting")
-    AP.add_argument('-o', '--output',
-                    help="Output filename (PDF).")
+    AP.add_argument('-s', '--sizes', help="aCGH segment sizes for faceting")
+    AP.add_argument('-o', '--output', help="Output filename (PDF).")
     args = AP.parse_args()
 
     all_rna = pd.read_table(args.rna, index_col=0)

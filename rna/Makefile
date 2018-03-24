@@ -7,6 +7,7 @@ acgh_cns := $(patsubst tcga-acgh-seg/%.txt,acgh/%.acgh.cns,$(tcga_acgh_seg))
 # RNA-derived read counts, expression ratios
 tcga_rna_counts = $(sort $(wildcard tcga-rna-counts/TCGA-*.txt))
 plain_cnr := $(patsubst tcga-rna-counts/%.txt,out/%.cnr,$(tcga_rna_counts))
+nocorr_cnr := $(patsubst tcga-rna-counts/%.txt,nocorr/%.cnr,$(tcga_rna_counts))
 
 # Smoothings
 tsmooth100_cnr := $(patsubst out/%.cnr,tsmooth100/%.tsmooth100.cnr,$(plain_cnr))
@@ -14,6 +15,7 @@ tsmooth200_cnr := $(patsubst out/%.cnr,tsmooth200/%.tsmooth200.cnr,$(plain_cnr))
 wsmooth100_cnr := $(patsubst out/%.cnr,wsmooth100/%.wsmooth100.cnr,$(plain_cnr))
 wsmooth200_cnr := $(patsubst out/%.cnr,wsmooth200/%.wsmooth200.cnr,$(plain_cnr))
 wsmooth400_cnr := $(patsubst out/%.cnr,wsmooth400/%.wsmooth400.cnr,$(plain_cnr))
+nocorrsmooth100_cnr := $(patsubst nocorr/%.cnr,nocorrsmooth100/%.nocorrsmooth100.cnr,$(nocorr_cnr))
 # asmooth50_cnr := asmooth50/%
 
 # Segmentations
@@ -29,19 +31,20 @@ notx_cnr := $(patsubst tcga-rna-counts/%.txt,notx/%.cnr,$(tcga_rna_counts))
 nogctx_cnr := $(patsubst tcga-rna-counts/%.txt,nogctx/%.cnr,$(tcga_rna_counts))
 
 # Plots
-all_labels_bin := plain tsmooth100 tsmooth200 wsmooth100 wsmooth200 wsmooth400
+all_labels_bin := plain tsmooth100 tsmooth200 nocorrsmooth100 wsmooth100 wsmooth200 wsmooth400
 all_labels_seg := arm cbs cbsgt20 flasso haar hmm hmmgt20
-resid_labels := tsmooth100 tsmooth200 wsmooth100 wsmooth200 arm cbs cbsgt20
-bias_labels := nogctx nogc notx plain wsmooth200
+resid_labels := tsmooth100 tsmooth200 nocorrsmooth100 wsmooth100 wsmooth200 arm cbs cbsgt20
+bias_labels := nogctx nogc notx plain
 heat_labels := arm cbs flasso
 
 plots_2d := $(patsubst %,plots/rna-vs-acgh-%.pdf,$(resid_labels))
 plot_resid := plots/residuals-vs-acgh.pdf
 plot_bias := plots/bias-vs-acgh.pdf
+plot_bias_facet := plots/bias-vs-acgh-facet.pdf
 heatmaps :=  $(patsubst %,plots/heatmap-%.pdf,$(heat_labels))
 
 
-all: build/_thunk $(heatmaps) $(plots_2d) $(plot_resid) $(plot_bias)
+all: build/_thunk $(heatmaps) $(plots_2d) $(plot_resid) $(plot_bias) $(plot_bias_facet)
 
 .PSEUDO: clean
 clean:
@@ -50,6 +53,7 @@ clean:
 
 # Generate intermediate intermediate files that aren't explicit targets
 build/_thunk: build/tcga_combined_log2ratios.tsv \
+	build/tcga_combined_log2ratios_nocorr.tsv \
 	build/tcga_combined_log2ratios_nogc.tsv \
 	build/tcga_combined_log2ratios_notx.tsv \
 	build/tcga_combined_log2ratios_nogctx.tsv \
@@ -79,6 +83,12 @@ build/tcga_combined_log2ratios.tsv: $(corr_out) $(gene_info)
 	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
 		-o $@ --output-dir out/ $(tcga_rna_counts)
 
+# Makes nocorr_cnr (log2 values same as plain_cnr, but different weights)
+build/tcga_combined_log2ratios_nocorr.tsv: $(gene_info)
+	mkdir -p build/
+	cnvkit.py import-rna -f counts -g $(gene_info) \
+		-o $@ --output-dir nocorr/ $(tcga_rna_counts)
+
 # Makes nogc_cnr, notx_cnr, nogctx_cnr
 build/tcga_combined_log2ratios_nogc.tsv: $(corr_out) $(gene_info)
 	mkdir -p build/
@@ -99,7 +109,6 @@ build/tcga_combined_log2ratios_nogctx.tsv: $(corr_out) $(gene_info)
 		-o $@ --output-dir nogctx/ $(tcga_rna_counts)
 
 
-
 # CNVkit smoothing and segmentation ===
 
 # $(asmooth50_cnr): adaptive_smooth.py $(plain_cnr)
@@ -112,6 +121,10 @@ $(firstword $(tsmooth100_cnr)): smooth_tirosh.py $(plain_cnr)
 $(firstword $(tsmooth200_cnr)): smooth_tirosh.py $(plain_cnr)
 	mkdir -p tsmooth200
 	python $^ -w 200 -d tsmooth200
+
+$(firstword $(nocorrsmooth100_cnr)): smooth_cnr.py $(nocorr_cnr)
+	mkdir -p nocorrsmooth100
+	python $^ -w 100 -d nocorrsmooth100
 
 $(firstword $(wsmooth100_cnr)): smooth_cnr.py $(plain_cnr)
 	mkdir -p wsmooth100
@@ -166,6 +179,9 @@ build/tcga-rna-notx-genes.tsv: collate_by_gene.py $(notx_cnr)
 build/tcga-rna-nogctx-genes.tsv: collate_by_gene.py $(nogctx_cnr)
 	python $^ -g $(gene_info) -o $@
 
+build/tcga-rna-nocorrsmooth100-genes.tsv: collate_by_gene.py $(nocorrsmooth100_cnr)
+	python $^ -g $(gene_info) -o $@
+
 build/tcga-rna-wsmooth100-genes.tsv: collate_by_gene.py $(wsmooth100_cnr)
 	python $^ -g $(gene_info) -o $@
 
@@ -218,12 +234,17 @@ $(plots_2d): plots/rna-vs-acgh-%.pdf: \
 $(plot_resid): \
 	plot_residuals.py build/tcga-acgh-seg-genes.tsv \
 	$(patsubst %,build/tcga-rna-%-genes.tsv,$(resid_labels))
-	python $^ -o $@
+	python $^ -s build/tcga-acgh-seg-genes.size.tsv -o $@
 
 $(plot_bias): \
 	plot_residuals.py build/tcga-acgh-seg-genes.tsv \
 	$(patsubst %,build/tcga-rna-%-genes.tsv,$(bias_labels))
 	python $^ -o $@
+
+$(plot_bias_facet): \
+	plot_residuals.py build/tcga-acgh-seg-genes.tsv \
+	$(patsubst %,build/tcga-rna-%-genes.tsv,$(bias_labels))
+	python $^ -s build/tcga-acgh-seg-genes.size.tsv -o $@
 
 # $(heatmaps): plots/heatmap-%.pdf: $(foreach $(heat_labels,%/...)
 #         cnvkit.py heatmap -d --no-shift-xy $^ -o $@
