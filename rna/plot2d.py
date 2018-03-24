@@ -163,7 +163,7 @@ def plot_paired_genes_facet(table, output=None):
     pad = 0.3
     xy_limits = (xymin - pad, xymax + pad)
     nbins = 50
-    size_labels = ['<5MB', '5-50MB', '>50MB']
+    size_labels = ['>50MB', '5-50MB', '<5MB']
     grid = seaborn.FacetGrid(table, col='Size',
                              col_order=size_labels,
                              xlim=xy_limits, ylim=xy_limits,
@@ -193,6 +193,7 @@ def plot_paired_genes_facet(table, output=None):
                   bins='log', gridsize=nbins, mincnt=1,
                  )
         ax.set_xlabel("aCGH")
+        ax.set_title(size_label)
     grid.axes.flat[0].set_ylabel("RNA")
 
     if output:
