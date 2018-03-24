@@ -24,7 +24,7 @@ import seaborn
 
 from scipy.stats import pearsonr
 
-seaborn.set(font='Sans', style='whitegrid')
+seaborn.set(font='Sans', style='whitegrid', context='poster')
 
 
 def extract_xy(rna_table, acgh_table):

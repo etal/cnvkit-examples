@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 
-sn.set(font='Sans', style='whitegrid')
+sn.set(font='Sans', style='whitegrid', context='poster', palette='pastel')
 
 
 def load_tables(acgh_fname, size_fname, rna_fnames):

@@ -33,7 +33,7 @@ nogctx_cnr := $(patsubst tcga-rna-counts/%.txt,nogctx/%.cnr,$(tcga_rna_counts))
 # Plots
 all_labels_bin := plain tsmooth100 tsmooth200 nocorrsmooth100 wsmooth100 wsmooth200 wsmooth400
 all_labels_seg := arm cbs cbsgt20 flasso haar hmm hmmgt20
-resid_labels := tsmooth100 tsmooth200 nocorrsmooth100 wsmooth100 wsmooth200 arm cbs cbsgt20
+resid_labels := tsmooth100 nocorrsmooth100 wsmooth100 arm cbs cbsgt20
 bias_labels := nogctx nogc notx plain
 heat_labels := arm cbs flasso
 
