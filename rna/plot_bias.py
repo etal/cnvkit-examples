@@ -48,7 +48,8 @@ def plot_sample(cnr, key, output_dir):
     if key == "gc":
         plt.xlim(.2, .8)
     else:
-        plt.xlim(0, 5000)
+        assert key == "tx_length"
+        plt.xlim(200, 10000)
         plt.xscale("log")
     out_fname = "{}.{}_bias.png".format(cnr.sample_id, key)
     if output_dir:
