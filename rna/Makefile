@@ -8,6 +8,8 @@ acgh_cns := $(patsubst tcga-acgh-seg/%.txt,acgh/%.acgh.cns,$(tcga_acgh_seg))
 tcga_rna_counts = $(sort $(wildcard tcga-rna-counts/TCGA-*.txt))
 plain_cnr := $(patsubst tcga-rna-counts/%.txt,out/%.cnr,$(tcga_rna_counts))
 nocorr_cnr := $(patsubst tcga-rna-counts/%.txt,nocorr/%.cnr,$(tcga_rna_counts))
+tcga_normals := $(patsubst %, tcga-rna-counts/%.txt,TCGA-BF-AAP2-01 TCGA-EB-A299-01 TCGA-EB-A44N-01 TCGA-EB-A4IS-01 TCGA-EB-A4XL-01 TCGA-EB-A550-01 TCGA-GN-A4U5-01 TCGA-GN-A4U8-11)
+normal_cnr := $(patsubst tcga-rna-counts/%.txt,normal/%.cnr,$(tcga_rna_counts))
 
 # Smoothings
 tsmooth100_cnr := $(patsubst out/%.cnr,tsmooth100/%.tsmooth100.cnr,$(plain_cnr))
@@ -24,6 +26,7 @@ cbs_cns := $(patsubst out/%.cnr,cbs/%.cns,$(plain_cnr))
 flasso_cns := $(patsubst out/%.cnr,flasso/%.cns,$(plain_cnr))
 haar_cns := $(patsubst out/%.cnr,haar/%.cns,$(plain_cnr))
 hmm_cns := $(patsubst out/%.cnr,hmm/%.cns,$(plain_cnr))
+arm_normal_cns := $(patsubst out/%.cnr,arm/%.cns,$(normal_cnr))
 
 # Bias corrections
 nogc_cnr := $(patsubst tcga-rna-counts/%.txt,nogc/%.cnr,$(tcga_rna_counts))
@@ -35,7 +38,7 @@ all_labels_bin := plain tsmooth100 tsmooth200 nocorrsmooth100 wsmooth100 wsmooth
 all_labels_seg := arm cbs cbsgt20 flasso haar hmm hmmgt20
 resid_labels := tsmooth100 nocorrsmooth100 wsmooth100 arm cbs cbsgt20
 bias_labels := nogctx nogc notx plain
-heat_labels := arm cbs flasso
+heat_labels := arm cbs flasso arm-normal
 
 heatmaps :=  $(patsubst %,plots/heatmap-%.pdf,$(heat_labels))
 plots_2d := $(patsubst %,plots/rna-vs-acgh-%.pdf,$(resid_labels))
@@ -56,6 +59,7 @@ clean:
 
 # Generate intermediate intermediate files that aren't explicit targets
 build/_thunk: build/tcga_combined_log2ratios.tsv \
+	build/tcga_combined_log2ratios_normal.tsv \
 	build/tcga_combined_log2ratios_nocorr.tsv \
 	build/tcga_combined_log2ratios_nogc.tsv \
 	build/tcga_combined_log2ratios_notx.tsv \
@@ -85,6 +89,13 @@ build/tcga_combined_log2ratios.tsv: $(corr_out) $(gene_info)
 	mkdir -p $(dir $@)
 	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
 		-o $@ --output-dir out/ $(tcga_rna_counts)
+
+# Makes all $(normal_cnr) as out/*.cnr
+build/tcga_combined_log2ratios_normal.tsv: $(corr_out) $(gene_info)
+	mkdir -p $(dir $@)
+	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
+		-o $@ --output-dir normal/ $(tcga_rna_counts) \
+		-n $(tcga_normals)
 
 # Makes nocorr_cnr (log2 values same as plain_cnr, but different weights)
 build/tcga_combined_log2ratios_nocorr.tsv: $(gene_info)
@@ -252,6 +263,10 @@ $(plot_bias_facet): \
 # $(heatmaps): plots/heatmap-%.pdf: $(foreach $(heat_labels,%/...)
 #         cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 plots/heatmap-arm.pdf: $(arm_cns)
+	mkdir -p $(dir $@)
+	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
+
+plots/heatmap-arm-normal.pdf: $(arm_normal_cns)
 	mkdir -p $(dir $@)
 	cnvkit.py heatmap -d --no-shift-xy $^ -o $@
 
