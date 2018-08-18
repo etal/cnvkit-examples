@@ -24,6 +24,7 @@ import sys
 
 import cnvlib
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn
 
@@ -52,25 +53,43 @@ def load_depths_logs(cnr_fnames):
     keep_idx = (depths != 0)
     depths = depths[keep_idx]
     logs = np.concatenate(logs)[keep_idx]
-    return depths, logs
+    return pd.DataFrame({'depth': depths, 'log2': logs})
 
 
-depths, logs = load_depths_logs(args.cnr_files)
 
-max_x = depths.max() + 1
-plt.hlines(0, 0, max_x)
-plt.xlim(1, max_x)
-#plt.xscale('log')
-plt.xlabel('Observed read depth')
-plt.ylabel('Normalized log2 ratio')
+d = load_depths_logs(args.cnr_files)
 
+max_x = d['depth'].max() + 1
+nbins = 90
+grid = seaborn.jointplot('depth', 'log2', data=d,
+                         kind='hex',
+                         space=0.03,
+                         xlim=(1, max_x),
+                         ylim=(-6, 6),
+                         stat_func=None,
+                         xscale='log',
+                         joint_kws=dict(
+                             bins='log',
+                             #edgecolors='none',
+                             gridsize=nbins,
+                             mincnt=2,
+                             #xscale='log',
+                         ),
+                         marginal_kws=dict(
+                             bins=None,
+                             hist_kws=dict(
+                                 histtype='stepfilled',
+                                 #alpha=None,
+                                 #color=(0.298, 0.447, 0.69, 0.4),
+                                 #edgecolor=(0.298, 0.447, 0.69, 1.0),
+                                 linewidth=1,
+                             ),
+                         ),
+                        )
 
-# TODO use seaborn
-
-#plt.scatter(depths, logs, marker='o', alpha=.2, edgecolors='none', color='k')
-plt.hexbin(depths, logs, gridsize=200, bins='log', mincnt=1,
-           xscale='log',
-           edgecolors='none')
+grid.ax_joint.set_xlabel('Observed read depth')
+grid.ax_joint.set_ylabel('Normalized log2 ratio')
+grid.ax_joint.hlines(0, 0, max_x)
 
 
 if args.output:
