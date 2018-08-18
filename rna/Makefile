@@ -8,6 +8,7 @@ acgh_cns := $(patsubst tcga-acgh-seg/%.txt,acgh/%.acgh.cns,$(tcga_acgh_seg))
 tcga_rna_counts = $(sort $(wildcard tcga-rna-counts/TCGA-*.txt))
 plain_cnr := $(patsubst tcga-rna-counts/%.txt,out/%.cnr,$(tcga_rna_counts))
 nocorr_cnr := $(patsubst tcga-rna-counts/%.txt,nocorr/%.cnr,$(tcga_rna_counts))
+nolimit_cnr := $(patsubst tcga-rna-counts/%.txt,nolimit/%.cnr,$(tcga_rna_counts))
 tcga_normals := $(patsubst %, tcga-rna-counts/%.txt,TCGA-BF-AAP2-01 TCGA-EB-A299-01 TCGA-EB-A44N-01 TCGA-EB-A4IS-01 TCGA-EB-A4XL-01 TCGA-EB-A550-01 TCGA-GN-A4U5-01 TCGA-GN-A4U8-11)
 normal_cnr := $(patsubst tcga-rna-counts/%.txt,normal/%.cnr,$(tcga_rna_counts))
 
@@ -59,6 +60,7 @@ clean:
 
 # Generate intermediate intermediate files that aren't explicit targets
 build/_thunk: build/tcga_combined_log2ratios.tsv \
+	build/tcga_combined_log2ratios_nolimit.tsv \
 	build/tcga_combined_log2ratios_normal.tsv \
 	build/tcga_combined_log2ratios_nocorr.tsv \
 	build/tcga_combined_log2ratios_nogc.tsv \
@@ -89,6 +91,13 @@ build/tcga_combined_log2ratios.tsv: $(corr_out) $(gene_info)
 	mkdir -p $(dir $@)
 	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
 		-o $@ --output-dir out/ $(tcga_rna_counts)
+
+# Makes all $(nolimit_cnr) as nolimit/*.cnr
+build/tcga_combined_log2ratios_nolimit.tsv: $(corr_out) $(gene_info)
+	mkdir -p $(dir $@)
+	cnvkit.py import-rna -f counts -c $< -g $(gene_info) \
+		--max-log 0 \
+		-o $@ --output-dir nolimit/ $(tcga_rna_counts)
 
 # Makes all $(normal_cnr) as out/*.cnr
 build/tcga_combined_log2ratios_normal.tsv: $(corr_out) $(gene_info)
